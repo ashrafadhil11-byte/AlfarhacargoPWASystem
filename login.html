@@ -136,10 +136,10 @@
       try {
         const response = await fetch(GOOGLE_API_URL, {
           method: 'POST',
-          // CRITICAL: This bypasses the Google CORS block
           headers: {
             'Content-Type': 'text/plain;charset=utf-8',
           },
+          redirect: "follow", // ADD THIS LINE
           body: JSON.stringify({
             action: "authenticate",
             userId: userId,
