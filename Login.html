@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Login - Al-Farha Cargo</title>
+  
+  <meta name="theme-color" content="#4f46e5">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --bg-color: #fafafa; --card-bg: #ffffff; --border-color: #eaeaea;
+      --text-main: #111827; --text-muted: #6b7280;
+      --brand-accent: #4f46e5; --brand-dark: #3730a3;
+    }
+
+    body, html {
+      margin: 0; padding: 0; background-color: var(--bg-color);
+      font-family: 'Comfortaa', cursive; height: 100vh; overflow: hidden;
+    }
+
+    .login-wrapper { display: flex; height: 100vh; width: 100vw; }
+
+    /* Left Branding - Hidden on Mobile */
+    .login-left {
+      flex: 1; background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-dark) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: white; padding: 40px; text-align: center; position: relative; overflow: hidden;
+    }
+    .login-left::before { content: ''; position: absolute; top: -20%; left: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%; }
+    .left-icon { font-size: 5rem; margin-bottom: 20px; animation: fadeUp 0.8s ease forwards; }
+    .left-title { font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 3.5rem; letter-spacing: -0.04em; margin: 0 0 10px 0; opacity: 0; animation: fadeUp 0.8s ease 0.1s forwards; }
+    .left-subtitle { font-size: 1.2rem; font-weight: 300; opacity: 0; animation: fadeUp 0.8s ease 0.2s forwards; }
+
+    /* Right Login Panel */
+    .login-right {
+      width: 100%; max-width: 550px; background-color: var(--bg-color);
+      display: flex; align-items: center; justify-content: center; padding: 40px; z-index: 10;
+    }
+
+    .login-card {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px;
+      width: 100%; padding: 48px 40px; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.04);
+      opacity: 0; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+    }
+
+    .brand-title { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1.6rem; color: var(--text-main); margin-bottom: 6px; }
+    .brand-subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; }
+
+    .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+    .input-icon { position: absolute; top: 50%; transform: translateY(-50%); left: 18px; color: var(--text-muted); font-size: 1.2rem; transition: color 0.2s ease; }
+    .minimal-input {
+      border-radius: 12px; padding: 14px 16px 14px 50px; border: 1px solid var(--border-color); background-color: #f8fafc;
+      font-family: 'Lexend', sans-serif; font-weight: 500; color: var(--text-main); width: 100%; font-size: 0.95rem; transition: all 0.2s ease; box-sizing: border-box;
+    }
+    .minimal-input:focus { outline: none; border-color: var(--brand-accent); background-color: #ffffff; }
+    .input-group:focus-within .input-icon { color: var(--brand-accent); }
+
+    .btn-primary-custom {
+      font-family: 'Lexend', sans-serif; font-weight: 600; background-color: var(--brand-accent); color: white;
+      border: none; padding: 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-size: 1.05rem; margin-top: 24px;
+    }
+    .btn-primary-custom:hover { background-color: var(--brand-dark); transform: translateY(-2px); }
+    .btn-primary-custom:disabled { background-color: #94a3b8; cursor: not-allowed; transform: none; }
+
+    .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 16px; margin-bottom: 24px; text-align: left; display: none; }
+    .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+
+    @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    /* Mobile Overrides */
+    @media (max-width: 900px) {
+      .login-left { display: none; }
+      .login-right { max-width: 100%; padding: 20px; }
+      .login-card { padding: 40px 24px; box-shadow: none; border: none; background: transparent;}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+    <div class="login-left">
+      <i class="bi bi-box-seam-fill left-icon"></i>
+      <h1 class="left-title">Al-Farha Cargo</h1>
+      <p class="left-subtitle">Enterprise Logistics & Fleet Management</p>
+    </div>
+
+    <div class="login-right">
+      <div class="login-card">
+        <h3 class="brand-title">Welcome Back</h3>
+        <p class="brand-subtitle">Sign in to your dashboard.</p>
+        
+        <div id="login-alert" class="custom-alert alert-danger"></div>
+        
+        <div class="input-group">
+          <i class="bi bi-person input-icon"></i>
+          <input type="text" class="minimal-input" id="userId" placeholder="User ID" autocomplete="off">
+        </div>
+        
+        <div class="input-group">
+          <i class="bi bi-lock input-icon"></i>
+          <input type="password" class="minimal-input" id="pin" placeholder="Password / PIN">
+        </div>
+        
+        <button id="loginBtn" class="btn-primary-custom" onclick="processLogin()">
+          Secure Sign In <i class="bi bi-arrow-right-short" style="font-size: 1.3rem;"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Replace this with your new Google Apps Script Web App URL
+    const GOOGLE_API_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+    async function processLogin() {
+      const userId = document.getElementById('userId').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const alertDiv = document.getElementById('login-alert');
+      const loginBtn = document.getElementById('loginBtn');
+
+      if (!userId || !pin) {
+        alertDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Please enter both ID and PIN.';
+        alertDiv.style.display = 'block';
+        return;
+      }
+
+      alertDiv.style.display = 'none';
+      loginBtn.innerHTML = 'Authenticating...';
+      loginBtn.disabled = true;
+
+      try {
+        const response = await fetch(GOOGLE_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: "authenticate",
+            userId: userId,
+            pin: pin
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          localStorage.setItem('afc_user', JSON.stringify(data.user));
+          
+          // Route to the correct dashboard based on screen size
+          if (window.innerWidth <= 900) {
+            window.location.href = '/mobiledashboard.html';
+          } else {
+            window.location.href = '/dashboard.html';
+          }
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        alertDiv.innerHTML = `<i class="bi bi-x-circle-fill"></i> ${error.message || 'Network Error. Please check your connection.'}`;
+        alertDiv.style.display = 'block';
+        loginBtn.innerHTML = 'Secure Sign In <i class="bi bi-arrow-right-short" style="font-size: 1.3rem;"></i>';
+        loginBtn.disabled = false;
+      }
+    }
+
+    document.getElementById('pin').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') processLogin();
+    });
+  </script>
+</body>
+</html>
