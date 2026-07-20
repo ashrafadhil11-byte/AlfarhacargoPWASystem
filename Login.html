@@ -113,9 +113,9 @@
     </div>
   </div>
 
-  <script>
-    // Replace this with your new Google Apps Script Web App URL
-    const GOOGLE_API_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+<script>
+    // Your Live Google Apps Script API URL
+    const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
 
     async function processLogin() {
       const userId = document.getElementById('userId').value.trim();
@@ -136,6 +136,10 @@
       try {
         const response = await fetch(GOOGLE_API_URL, {
           method: 'POST',
+          // CRITICAL: This bypasses the Google CORS block
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
           body: JSON.stringify({
             action: "authenticate",
             userId: userId,
