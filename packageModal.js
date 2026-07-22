@@ -1,6 +1,31 @@
 // packageModal.js
 
-// 1. Inject the Modal HTML into the DOM when the script loads
+// --- HELPER: Country to Flag Emoji ---
+function getFlagEmoji(countryName) {
+  if (!countryName) return '📍';
+  const name = countryName.toString().trim().toUpperCase();
+  
+  const flags = {
+    'OMAN': '🇴🇲',
+    'UNITED ARAB EMIRATES': '🇦🇪',
+    'UAE': '🇦🇪',
+    'INDIA': '🇮🇳',
+    'SAUDI ARABIA': '🇸🇦',
+    'KSA': '🇸🇦',
+    'QATAR': '🇶🇦',
+    'BAHRAIN': '🇧🇭',
+    'KUWAIT': '🇰🇼',
+    'PAKISTAN': '🇵🇰',
+    'BANGLADESH': '🇧🇩',
+    'NEPAL': '🇳🇵',
+    'SRI LANKA': '🇱🇰',
+    'PHILIPPINES': '🇵🇭'
+  };
+  
+  return flags[name] || '📍';
+}
+
+// 1. Inject the Modal HTML
 function injectPackageModal() {
   const modalHTML = `
   <div class="bottom-sheet-overlay" id="pkgDetailsModal" onclick="closePkgModal(event)">
@@ -20,24 +45,22 @@ function injectPackageModal() {
 
 document.addEventListener('DOMContentLoaded', injectPackageModal);
 
-// 2. Function to close the modal
+// 2. Close Modal Function
 function closePkgModal(e) {
   if (e === 'force' || e.target.id === 'pkgDetailsModal') {
     document.getElementById('pkgDetailsModal').classList.remove('active');
   }
 }
 
-// 3. Function triggered when a Live Activity card is clicked
+// 3. Trigger Modal & Fetch Data
 async function openPackageModal(awb) {
   const modal = document.getElementById('pkgDetailsModal');
   const content = document.getElementById('pkgModalContent');
   
-  // Show modal and loading state
   modal.classList.add('active');
   content.innerHTML = '<div style="text-align:center; padding: 40px; color: #94a3b8;"><span class="spinner-border spinner-border-sm"></span> Fetching details...</div>';
 
   try {
-    // Fetch data using the global API URL defined in mobiledashboard.html
     const response = await fetch(GOOGLE_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -53,7 +76,9 @@ async function openPackageModal(awb) {
     if (res.success) {
       const pkg = res.details;
       
-      // Render the complete details
+      const originFlag = getFlagEmoji(pkg.originCountry);
+      const destFlag = getFlagEmoji(pkg.destCountry);
+      
       content.innerHTML = `
         <div style="background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); margin-bottom: 20px;">
           
@@ -68,12 +93,16 @@ async function openPackageModal(awb) {
             <div>
               <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">Sender</div>
               <div style="font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--text-main); margin-top: 4px;">${pkg.shipper || 'N/A'}</div>
-              <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><i class="bi bi-geo-alt"></i> ${pkg.origin || 'N/A'}</div>
+              <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                <span style="font-size: 1.1rem; margin-right: 4px;">${originFlag}</span>${pkg.origin || 'N/A'}
+              </div>
             </div>
             <div>
               <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">Consignee</div>
               <div style="font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--text-main); margin-top: 4px;">${pkg.consignee || 'N/A'}</div>
-              <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><i class="bi bi-geo-alt"></i> ${pkg.dest || 'N/A'}</div>
+              <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
+                <span style="font-size: 1.1rem; margin-right: 4px;">${destFlag}</span>${pkg.dest || 'N/A'}
+              </div>
             </div>
           </div>
           
