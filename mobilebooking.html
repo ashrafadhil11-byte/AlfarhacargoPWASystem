@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Book Package - Al-Farha Cargo</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root { 
+      --bg-color: #f8fafc; 
+      --card-bg: #ffffff; 
+      --border-color: #e2e8f0; 
+      --text-main: #0f172a; 
+      --text-muted: #64748b; 
+      --brand-accent: #4f46e5; 
+      --bottom-nav-height: 65px;
+    }
+    
+    body, html { margin: 0; padding: 0; box-sizing: border-box; height: 100vh; overflow: hidden; background-color: var(--bg-color); font-family: 'Comfortaa', cursive; color: var(--text-main); }
+    *, *::before, *::after { box-sizing: inherit; }
+    
+    .mobile-app { display: flex; flex-direction: column; height: 100vh; width: 100vw; position: relative; overflow: hidden; }
+    .bg-glow { position: fixed; top: -10%; right: -20%; width: 80vw; height: 80vw; border-radius: 50%; background: radial-gradient(circle, rgba(79,70,229,0.08) 0%, rgba(248,250,252,0) 70%); z-index: -1; pointer-events: none; }
+    
+    .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-height) + 20px); -webkit-overflow-scrolling: touch; }
+    .main-scroll-area::-webkit-scrollbar { display: none; }
+
+    /* Header */
+    .page-header { margin-bottom: 20px; animation: slideDown 0.5s ease-out; }
+    .page-title { font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; margin: 0 0 4px 0; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+    .page-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
+
+    /* Tabs */
+    .tabs-wrapper { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; margin-bottom: 20px; margin-left: -16px; margin-right: -16px; padding: 0 16px; }
+    .tabs-wrapper::-webkit-scrollbar { display: none; }
+    .admin-tabs { display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 14px; gap: 4px; }
+    .tab-btn { background: transparent; border: none; font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.85rem; color: #475569; padding: 10px 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+    .tab-btn.active { color: var(--brand-accent); background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+    /* Content Cards */
+    .content-card { display: none; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); animation: slideUp 0.4s ease-out backwards; margin-bottom: 20px; }
+    .content-card.active { display: block; }
+    .form-section-title { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; color: var(--text-main); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
+    .form-section-title i { color: var(--brand-accent); background: #eef2ff; padding: 6px; border-radius: 8px; font-size: 0.9rem; }
+    
+    /* Inputs */
+    .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .input-label { font-family: 'Lexend', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .input-with-btn { display: flex; gap: 8px; }
+    .minimal-input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 2px solid #f1f5f9; background-color: #f8fafc; font-family: 'Lexend', sans-serif; font-weight: 500; color: var(--text-main); font-size: 0.95rem; transition: all 0.3s; outline: none; }
+    .minimal-input:focus { background-color: #ffffff; border-color: var(--brand-accent); }
+    .btn-scan-input { background: var(--text-main); color: white; border: none; border-radius: 12px; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .btn-scan-input:hover { background: var(--brand-accent); }
+    
+    /* Upload Zone */
+    .upload-zone { border: 2px dashed #cbd5e0; background-color: #f8fafc; border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s; }
+    .upload-icon { font-size: 3rem; color: var(--brand-accent); margin-bottom: 12px; display: block;}
+    .upload-text { font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text-main); }
+    
+    /* Buttons */
+    .btn-primary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: var(--brand-accent); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; transition: all 0.2s; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); margin-top: 10px;}
+    .btn-secondary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: #f1f5f9; color: #475569; border: none; padding: 16px; border-radius: 14px; width: 100%; margin-top: 12px; cursor: pointer; font-size: 0.95rem; }
+
+    /* Scan & Fetch UI */
+    .scan-hero { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 40px 20px; text-align: center; color: white; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .scan-hero i { font-size: 3.5rem; color: #38bdf8; margin-bottom: 16px; display: inline-block; animation: float 3s ease-in-out infinite; }
+    .scan-hero h3 { font-family: 'Lexend', sans-serif; font-size: 1.2rem; margin: 0 0 8px 0; }
+    .scan-hero p { font-size: 0.85rem; opacity: 0.8; margin: 0 0 20px 0; }
+    .btn-trigger-scan { background: #38bdf8; color: #0f172a; border: none; padding: 14px 24px; border-radius: 12px; font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    
+    /* Fetched Data Preview Card */
+    .fetched-preview { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+    .fp-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e0; padding-bottom: 12px; margin-bottom: 12px; }
+    .fp-id { font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--brand-accent); font-size: 1.1rem; }
+    .fp-badge { background: #ecfdf5; color: #10b981; border: 1px solid #d1fae5; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .fp-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+    .fp-label { color: var(--text-muted); font-weight: 600; }
+    .fp-value { color: var(--text-main); font-weight: 700; text-align: right; }
+
+    /* Alerts & Modals */
+    .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
+    .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+    .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
+
+    /* Scanner Overlay Mockup */
+    .scanner-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 3000; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .scanner-overlay.active { opacity: 1; pointer-events: all; }
+    .scanner-header { display: flex; justify-content: space-between; padding: 20px; color: white; font-family: 'Lexend', sans-serif; }
+    .scanner-viewfinder { flex: 1; border: 2px solid rgba(255,255,255,0.2); margin: 40px; position: relative; display: flex; align-items: center; justify-content: center;}
+    .scanner-line { width: 100%; height: 2px; background: #ef4444; position: absolute; box-shadow: 0 0 10px #ef4444; animation: scanAnim 2s infinite linear; }
+    
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes scanAnim { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
+  </style>
+</head>
+<body>
+
+<!-- Scanner Modal -->
+<div class="scanner-overlay" id="scannerOverlay">
+  <div class="scanner-header">
+    <span style="font-weight: 600;">Scan Barcode</span>
+    <i class="bi bi-x-lg" style="font-size: 1.5rem; cursor: pointer;" onclick="closeScanner()"></i>
+  </div>
+  <div class="scanner-viewfinder">
+    <div class="scanner-line"></div>
+    <span style="color: rgba(255,255,255,0.5); font-family: monospace;">CAMERA ACTIVE</span>
+  </div>
+  <div style="padding: 20px; text-align: center;">
+    <button class="btn-trigger-scan" onclick="simulateSuccessfulScan()">Simulate Scan Detection</button>
+  </div>
+</div>
+
+<div class="mobile-app">
+  <div class="bg-glow"></div>
+
+  <div class="main-scroll-area">
+    <div class="page-header">
+      <h1 class="page-title"><i class="bi bi-journal-plus text-primary"></i> Create Booking</h1>
+      <p class="page-subtitle">Draft or fetch packages securely.</p>
+    </div>
+
+    <div class="tabs-wrapper">
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
+        <button class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-upc-scan"></i> Scan & Fetch</button>
+        <button class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-cloud-upload"></i> Bulk CSV</button>
+      </div>
+    </div>
+
+    <div id="booking-alert" class="custom-alert"></div>
+
+    <!-- TAB 1: SINGLE ENTRY -->
+    <div id="tab-single" class="content-card active">
+      <h3 class="form-section-title"><i class="bi bi-box-seam"></i> Identifiers</h3>
+      
+      <div class="input-group">
+        <label class="input-label">Booking ID</label>
+        <div class="input-with-btn">
+          <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., AFC-1001" autocomplete="off">
+          <button class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-upc-scan"></i></button>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 12px;">
+        <div class="input-group" style="flex: 1;">
+          <label class="input-label">Weight (KG)</label>
+          <input type="number" id="weight" class="minimal-input" placeholder="0.00" step="0.01">
+        </div>
+        <div class="input-group" style="flex: 1;">
+          <label class="input-label">Pieces (PCS)</label>
+          <input type="number" id="pcs" class="minimal-input" placeholder="1">
+        </div>
+      </div>
+
+      <h3 class="form-section-title" style="margin-top: 10px;"><i class="bi bi-person-badge"></i> Contact Info</h3>
+      <div class="input-group"><label class="input-label">Shipper Name</label><input type="text" id="shipper" class="minimal-input" placeholder="Sender's Name"></div>
+      <div class="input-group"><label class="input-label">Phone</label><input type="text" id="shipperPhone" class="minimal-input" placeholder="Phone Number"></div>
+      <div class="input-group"><label class="input-label">Consignee Name</label><input type="text" id="consignee" class="minimal-input" placeholder="Receiver's Name"></div>
+
+      <h3 class="form-section-title" style="margin-top: 10px;"><i class="bi bi-geo-alt"></i> Routing</h3>
+      <div style="display: flex; gap: 12px;">
+        <div class="input-group" style="flex:1;"><label class="input-label">Origin City</label><input type="text" id="originCity" class="minimal-input" placeholder="City"></div>
+        <div class="input-group" style="flex:1;"><label class="input-label">Origin Country</label><input type="text" id="originCountry" class="minimal-input" placeholder="Country"></div>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <div class="input-group" style="flex:1;"><label class="input-label">Dest City</label><input type="text" id="destCity" class="minimal-input" placeholder="City"></div>
+        <div class="input-group" style="flex:1;"><label class="input-label">Dest Country</label><input type="text" id="destCountry" class="minimal-input" placeholder="Country"></div>
+      </div>
+
+      <button id="submitBtn" class="btn-primary-custom" onclick="submitBooking()">Submit Booking <i class="bi bi-arrow-right"></i></button>
+      <button class="btn-secondary-custom" onclick="clearSingleForm()">Clear Fields</button>
+    </div>
+
+    <!-- TAB 2: SCAN & FETCH -->
+    <div id="tab-fetch" class="content-card">
+      
+      <div id="scanHeroState" class="scan-hero">
+        <i class="bi bi-qr-code-scan"></i>
+        <h3>Smart Scan & Add</h3>
+        <p>Scan a pre-generated barcode to pull details directly from the master software.</p>
+        <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
+      </div>
+
+      <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
+        <!-- Replacing bootstrap spinner with pure CSS animation for standalone PWA -->
+        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 2.5rem; color: var(--brand-accent); margin-bottom: 16px;"></i>
+        <h4 style="font-family: 'Lexend'; color: var(--text-main);">Fetching Details...</h4>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Pinging API for <span id="fetchingIdTxt" style="font-weight:bold;"></span></p>
+      </div>
+
+      <div id="scanResultState" class="d-none">
+        <h3 class="form-section-title"><i class="bi bi-cloud-check"></i> Fetched Details</h3>
+        
+        <div class="fetched-preview">
+          <div class="fp-header">
+            <span class="fp-id" id="fpId">---</span>
+            <span class="fp-badge">Data Verified</span>
+          </div>
+          <div class="fp-row"><span class="fp-label">Shipper:</span><span class="fp-value" id="fpShipper">---</span></div>
+          <div class="fp-row"><span class="fp-label">Consignee:</span><span class="fp-value" id="fpConsignee">---</span></div>
+          <div class="fp-row"><span class="fp-label">Weight:</span><span class="fp-value" id="fpWeight">--- KG</span></div>
+          <div class="fp-row"><span class="fp-label">Route:</span><span class="fp-value" id="fpRoute">---</span></div>
+        </div>
+
+        <button id="submitFetchedBtn" class="btn-primary-custom" onclick="submitFetchedBooking()"><i class="bi bi-check-circle"></i> Confirm & Save</button>
+        <button class="btn-secondary-custom" onclick="resetFetchState()">Cancel & Scan Again</button>
+      </div>
+
+    </div>
+
+    <!-- TAB 3: BULK UPLOAD -->
+    <div id="tab-bulk" class="content-card">
+      <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
+      <div class="upload-zone" onclick="document.getElementById('csvFileInput').click()">
+        <i class="bi bi-file-earmark-spreadsheet upload-icon"></i>
+        <div class="upload-text">Tap to select CSV file</div>
+      </div>
+      <button id="submitBulkBtn" class="btn-primary-custom d-none" onclick="submitBulkBookings()">Process Upload</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- INJECT COMMON NAVIGATION HERE -->
+<script src="/nav.js"></script>
+
+<script>
+  // YOUR LIVE API URL
+  const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
+
+  var sessionUser = JSON.parse(localStorage.getItem('afc_user'));
+  
+  if(!sessionUser) {
+    window.location.href = '/login.html';
+  }
+
+  var parsedBulkData = []; 
+  var activeScannerMode = null; // 'input' or 'fetch'
+  var tempFetchedData = null; // Stores API data before submission
+
+  function switchTab(tabId, btnElement) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+    document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    document.getElementById('booking-alert').style.display = 'none';
+  }
+
+  function showAlert(type, message) { 
+    const alertBox = document.getElementById('booking-alert'); 
+    alertBox.className = 'custom-alert alert-' + type; 
+    var icon = type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill';
+    alertBox.innerHTML = `<i class="bi bi-${icon}"></i> ` + message; 
+    alertBox.style.display = 'flex'; 
+    setTimeout(() => alertBox.style.display = 'none', 5000);
+  }
+
+  // --- SINGLE BOOKING LOGIC ---
+  async function submitBooking() {
+    const btn = document.getElementById('submitBtn'); 
+    const customId = document.getElementById('bookingID').value.trim();
+    if (!customId) return showAlert('danger', 'Please enter a Booking ID.');
+
+    const formData = {
+      bookingID: customId, 
+      shipper: document.getElementById('shipper').value.trim(), 
+      shipperPhone: document.getElementById('shipperPhone').value.trim(), 
+      consignee: document.getElementById('consignee').value.trim(),
+      originCity: document.getElementById('originCity').value.trim(), 
+      originCountry: document.getElementById('originCountry').value.trim(),
+      destCity: document.getElementById('destCity').value.trim(), 
+      destCountry: document.getElementById('destCountry').value.trim(),
+      packageType: 'Parcel', 
+      weight: document.getElementById('weight').value, 
+      pcs: document.getElementById('pcs').value
+    };
+
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Processing...';
+
+    try {
+      const response = await fetch(GOOGLE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: "createNewBooking",
+          bookingData: formData,
+          user: sessionUser.name,
+          branch: sessionUser.branch
+        })
+      });
+
+      const res = await response.json();
+      btn.disabled = false; 
+      btn.innerHTML = 'Submit Booking <i class="bi bi-arrow-right"></i>';
+
+      if(res.success) { 
+        showAlert('success', "Saved " + customId); 
+        clearSingleForm(); 
+      } else { 
+        showAlert('danger', res.message || "Failed to save booking."); 
+      }
+    } catch (error) {
+      btn.disabled = false; 
+      btn.innerHTML = 'Submit Booking <i class="bi bi-arrow-right"></i>';
+      showAlert('danger', 'Network connection error.');
+    }
+  }
+
+  function clearSingleForm() {
+    ['bookingID', 'shipper', 'shipperPhone', 'consignee', 'originCity', 'originCountry', 'destCity', 'destCountry', 'weight', 'pcs'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+  }
+
+  // --- SCAN & FETCH API LOGIC ---
+  function openScanner(mode) {
+    activeScannerMode = mode;
+    document.getElementById('scannerOverlay').classList.add('active');
+    // NOTE: In production, integrate HTML5-QRCode or QuaggaJS initialization here.
+  }
+
+  function closeScanner() {
+    document.getElementById('scannerOverlay').classList.remove('active');
+    activeScannerMode = null;
+  }
+
+  // MOCK FUNCTION: Simulates the camera successfully reading a barcode
+  function simulateSuccessfulScan() {
+    closeScanner();
+    const mockBarcode = "EXT-" + Math.floor(1000 + Math.random() * 9000); // e.g., EXT-4921
+
+    if (activeScannerMode === 'input') {
+      document.getElementById('bookingID').value = mockBarcode;
+      showAlert('success', 'Barcode scanned successfully.');
+    } else if (activeScannerMode === 'fetch') {
+      triggerApiFetch(mockBarcode);
+    }
+  }
+
+  function triggerApiFetch(scannedId) {
+    document.getElementById('scanHeroState').classList.add('d-none');
+    document.getElementById('scanLoadingState').classList.remove('d-none');
+    document.getElementById('fetchingIdTxt').innerText = scannedId;
+
+    // Simulate Network/API call delay
+    setTimeout(() => {
+      document.getElementById('scanLoadingState').classList.add('d-none');
+      
+      // Mock API Response Data
+      tempFetchedData = {
+        bookingID: scannedId,
+        shipper: "John Doe", shipperPhone: "968 99123456",
+        consignee: "Sarah Smith",
+        originCity: "Muscat", originCountry: "Oman",
+        destCity: "Dubai", destCountry: "UAE",
+        packageType: "Parcel", weight: "12.5", pcs: "2"
+      };
+
+      // Populate Preview UI
+      document.getElementById('fpId').innerText = tempFetchedData.bookingID;
+      document.getElementById('fpShipper').innerText = tempFetchedData.shipper;
+      document.getElementById('fpConsignee').innerText = tempFetchedData.consignee;
+      document.getElementById('fpWeight').innerText = tempFetchedData.weight + " KG / " + tempFetchedData.pcs + " PCS";
+      document.getElementById('fpRoute').innerText = tempFetchedData.originCity + " -> " + tempFetchedData.destCity;
+      
+      document.getElementById('scanResultState').classList.remove('d-none');
+    }, 1200);
+  }
+
+  async function submitFetchedBooking() {
+    const btn = document.getElementById('submitFetchedBtn');
+    if (!tempFetchedData) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Saving...';
+
+    try {
+      const response = await fetch(GOOGLE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: "createNewBooking",
+          bookingData: tempFetchedData,
+          user: sessionUser.name,
+          branch: sessionUser.branch
+        })
+      });
+
+      const res = await response.json();
+      
+      if(res.success) {
+        showAlert('success', "API Data Saved Successfully!");
+        resetFetchState();
+      } else {
+        showAlert('danger', res.message || "Failed to save.");
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
+      }
+    } catch (error) {
+      showAlert('danger', 'Network connection error.');
+      btn.disabled = false; 
+      btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
+    }
+  }
+
+  function resetFetchState() {
+    tempFetchedData = null;
+    document.getElementById('scanResultState').classList.add('d-none');
+    document.getElementById('scanHeroState').classList.remove('d-none');
+    document.getElementById('submitFetchedBtn').disabled = false;
+    document.getElementById('submitFetchedBtn').innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
+  }
+
+  // --- BULK UPLOAD LOGIC ---
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true, skipEmptyLines: true,
+      complete: function(results) {
+        parsedBulkData = results.data;
+        if(parsedBulkData.length === 0) return showAlert('danger', 'CSV is empty.');
+        
+        document.getElementById('submitBulkBtn').classList.remove('d-none');
+        document.getElementById('submitBulkBtn').innerText = `Process ${parsedBulkData.length} Bookings`;
+        showAlert('success', 'File loaded successfully. Ready to process.');
+      }
+    });
+  }
+
+  async function submitBulkBookings() {
+    if (parsedBulkData.length === 0) return;
+    const btn = document.getElementById('submitBulkBtn');
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Uploading...';
+
+    try {
+      const response = await fetch(GOOGLE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: "createBulkBookings",
+          bulkData: parsedBulkData,
+          user: sessionUser.name,
+          branch: sessionUser.branch
+        })
+      });
+
+      const res = await response.json();
+      
+      if(res.success) { 
+        showAlert('success', res.message || "Bulk upload successful!"); 
+        document.getElementById('csvFileInput').value = ''; 
+        parsedBulkData = [];
+        btn.classList.add('d-none');
+      } else { 
+        showAlert('danger', res.message || "Upload failed."); 
+      }
+      btn.disabled = false;
+    } catch (error) {
+      showAlert('danger', 'Network connection error.');
+      btn.disabled = false;
+      btn.innerHTML = 'Process Upload';
+    }
+  }
+</script>
+</body>
+</html>

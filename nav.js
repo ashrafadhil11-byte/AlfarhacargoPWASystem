@@ -4,12 +4,12 @@ function injectBottomNav() {
   // Get the current page filename
   const path = window.location.pathname.toLowerCase();
   
-  // Define navigation items
+  // Define navigation items and the keywords that trigger their "active" state
   const navItems = [
-    { name: 'Home', icon: 'bi-grid-fill', link: '/mobiledashboard.html', activeKeywords: ['dashboard', 'index', ''] },
+    { name: 'Home', icon: 'bi-grid-fill', link: '/mobiledashboard.html', activeKeywords: ['dashboard', 'index'] },
     { name: 'Book', icon: 'bi-plus-circle-fill', link: '/mobilebooking.html', activeKeywords: ['booking'] },
     { name: 'Inv', icon: 'bi-box-seam', link: '/transfers.html', activeKeywords: ['transfers', 'inv'] },
-    { name: 'Scan', icon: 'bi-upc-scan', link: '/scan.html', activeKeywords: ['scan'] }
+    { name: 'Scan', icon: 'bi-upc-scan', link: '/scan.html', activeKeywords: ['scan', 'status'] }
   ];
 
   // Create the nav container
@@ -30,8 +30,16 @@ function injectBottomNav() {
 
   // Build the buttons
   navItems.forEach(item => {
-    // Check if this button should be active
-    const isActive = item.activeKeywords.some(keyword => path.includes(keyword));
+    // Check if this button should be active based on the URL path
+    let isActive = false;
+    
+    // If we are at the exact root directory, default to Home
+    if ((path === '/' || path === '') && item.name === 'Home') {
+      isActive = true;
+    } else {
+      // Check if the current URL contains any of the active keywords for this button
+      isActive = item.activeKeywords.some(keyword => path.includes(keyword));
+    }
     
     const a = document.createElement('a');
     a.href = item.link;
