@@ -228,6 +228,9 @@
 
   <!-- INJECT COMMON NAVIGATION HERE -->
   <script src="/nav.js"></script>
+  
+  <!-- INJECT PACKAGE MODAL HERE -->
+  <script src="/packageModal.js"></script>
 
   <!-- ================= MODALS & BOTTOM SHEETS ================= -->
 
@@ -431,9 +434,15 @@
 
         var div = document.createElement('div');
         div.className = 'activity-card';
+        
+        // Make the entire card click to open the modal
+        div.style.cursor = 'pointer'; 
+        div.onclick = function() { openPackageModal(b.id); };
+        
+        // Added margin-right: 8px to force a hard space between icon and AWB
         div.innerHTML = `
           <div class="ac-top">
-            <span class="ac-id"><i class="bi bi-box-seam-fill me-2"></i>${b.id}</span>
+            <span class="ac-id"><i class="bi bi-box-seam-fill" style="margin-right: 8px;"></i>${b.id}</span>
             <span class="status-badge" style="${badgeStyle}">${displayStatus}</span>
           </div>
           <div class="ac-dest"><i class="bi bi-geo-alt"></i> ${b.destination}</div>
