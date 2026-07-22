@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
   <style>
-    /* (Your existing CSS variables and styling remain exactly the same) */
     :root { 
       --bg-color: #f8fafc; 
       --card-bg: #ffffff; 
@@ -49,21 +48,23 @@
     .header-actions { display: flex; gap: 8px; }
     .btn-action { background: var(--card-bg); border: 1px solid var(--border-color); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.02); cursor: pointer; transition: background 0.2s; }
     .btn-action:active { background: #f1f5f9; }
-    .btn-logout { color: #ef4444; } /* Red color for logout */
+    .btn-logout { color: #ef4444; } 
     
     .bell-badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 0.65rem; font-family: 'Lexend', sans-serif; font-weight: 700; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--card-bg); display: none; }
     .bell-badge.show { display: flex; animation: bell-bounce 1.5s ease infinite; }
     @keyframes bell-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
-    /* (Rest of your original CSS goes here) */
+    /* --- SEARCH BAR --- */
     .mobile-search-box { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px 6px 6px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px; position: relative; }
     .search-input { flex: 1; border: none; background: transparent; font-family: 'Lexend', sans-serif; font-size: 0.95rem; outline: none; color: var(--text-main); padding: 8px 0; }
     .btn-search { background: var(--text-main); color: white; border: none; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
     .search-alert { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.85rem; display: none; z-index: 10; box-shadow: 0 10px 20px rgba(220,38,38,0.1); }
 
+    /* --- STATS SCROLL --- */
     .stats-header { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1.1rem; margin-bottom: 12px; color: var(--text-main); }
     .stats-scroll-container { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 16px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
     .stats-scroll-container::-webkit-scrollbar { display: none; }
+    
     .mobile-stat-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; min-width: 140px; scroll-snap-align: start; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; position: relative; overflow: hidden; }
     .stat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 16px; }
     .icon-total { background: #f1f5f9; color: #475569; }
@@ -71,22 +72,27 @@
     .icon-delivered { background: #f0fdf4; color: #10b981; }
     .icon-exception { background: #fef2f2; color: #ef4444; }
     .icon-pending { background: #fffbeb; color: #d97706; }
+    
     .stat-val { font-family: 'Lexend', sans-serif; font-size: 1.8rem; font-weight: 700; margin: 0 0 4px 0; line-height: 1; display: flex; align-items: center; gap: 6px; }
     .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'Lexend', sans-serif; }
+    
     .live-dot { width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; display: inline-block; animation: alert-pulse 2s infinite; }
     .mobile-stat-card.alert-state { background: #fffafa; border-color: #fca5a5; }
     @keyframes alert-pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
+    /* --- RECENT ACTIVITY LIST --- */
     .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 8px; }
     .activity-title { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1.1rem; color: var(--text-main); margin: 0; }
+    
     .activity-list { display: flex; flex-direction: column; gap: 12px; }
     .activity-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; cursor: pointer; }
+    
     .ac-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .ac-id { font-family: 'Lexend', sans-serif; font-weight: 600; color: var(--brand-accent); font-size: 0.95rem; flex-shrink: 0; }
     .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; display: inline-block; border: 1px solid; font-family: 'Lexend', sans-serif; text-align: center; max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ac-dest { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
 
-    /* Bottom Sheets */
+    /* --- BOTTOM SHEETS --- */
     .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end; }
     .bottom-sheet-overlay.active { opacity: 1; pointer-events: all; }
     .bottom-sheet { background: var(--bg-color); width: 100%; max-height: 90vh; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
@@ -96,18 +102,20 @@
     .bs-close { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;}
     .bs-content { overflow-y: auto; padding: 20px; flex: 1; -webkit-overflow-scrolling: touch; }
 
-    .notif-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; gap: 16px; cursor: pointer;}
-    .notif-icon { background: #ecfdf5; color: #10b981; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
-    .notif-details { display: flex; flex-direction: column; gap: 4px; }
-    .notif-awb { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; color: var(--text-main); }
-    .notif-msg { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
-
+    /* --- MENU AND NOTIFICATIONS --- */
     .menu-list { display: flex; flex-direction: column; gap: 8px; }
     .menu-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px; border-radius: 16px; display: flex; align-items: center; gap: 16px; font-family: 'Lexend', sans-serif; font-weight: 500; color: var(--text-main); cursor: pointer; }
     .menu-item i { font-size: 1.3rem; color: var(--brand-accent); width: 24px; text-align: center; }
     .menu-item.danger { color: #ef4444; }
     .menu-item.danger i { color: #ef4444; }
 
+    .notif-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; gap: 16px; cursor: pointer;}
+    .notif-icon { background: #ecfdf5; color: #10b981; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .notif-details { display: flex; flex-direction: column; gap: 4px; }
+    .notif-awb { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; color: var(--text-main); }
+    .notif-msg { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+
+    /* --- DELIVERY ALERT MODAL --- */
     .alert-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px; }
     .alert-overlay.active { opacity: 1; pointer-events: all; }
     .alert-card { background: var(--card-bg); border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 360px; text-align: center; transform: scale(0.95); transition: transform 0.3s; }
@@ -138,7 +146,6 @@
         <span class="branch-text"><i class="bi bi-geo-alt-fill"></i> <span id="mobBranch">Branch</span></span>
       </div>
       
-      <!-- ADDED LOGOUT BUTTON NEXT TO BELL -->
       <div class="header-actions">
         <button class="btn-action" onclick="openBottomSheet('notifSheet')">
           <i class="bi bi-bell"></i>
@@ -202,6 +209,7 @@
   <!-- INJECT COMMON NAVIGATION & MODAL SCRIPTS HERE -->
   <script src="/nav.js"></script>
   <script src="/packageModal.js"></script>
+  <script src="/tracking.js"></script>
 
   <!-- ================= MODALS & BOTTOM SHEETS ================= -->
   
@@ -302,7 +310,6 @@
     scrollArea.addEventListener('touchmove', (e) => {
       if (!isPulling) return;
       const currentY = e.touches[0].clientY;
-      // If pulling down while at the top of the page
       if (currentY > startY + 20 && scrollArea.scrollTop === 0) {
         ptrContainer.classList.add('active');
       }
@@ -310,13 +317,8 @@
 
     scrollArea.addEventListener('touchend', async (e) => {
       if (isPulling && ptrContainer.classList.contains('active')) {
-        // Switch to spinning animation
         ptrContainer.classList.add('refreshing');
-        
-        // Fetch new data
         await fetchDashboardMetrics();
-        
-        // Hide the spinner once data loads
         ptrContainer.classList.remove('active', 'refreshing');
       }
       isPulling = false;
@@ -405,7 +407,6 @@
 
         var div = document.createElement('div');
         div.className = 'activity-card';
-        // CLICK TO OPEN THE EXTERNAL PACKAGE MODAL JS
         div.onclick = function() { openPackageModal(b.id); };
         
         div.innerHTML = `
