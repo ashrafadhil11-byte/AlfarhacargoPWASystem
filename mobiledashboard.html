@@ -159,7 +159,8 @@
 
     <!-- Search Box -->
     <div class="mobile-search-box">
-      <i class="bi bi-search text-muted me-2"></i>
+      <!-- Added a specific right margin to perfectly space out the icon from the text -->
+      <i class="bi bi-search text-muted" style="margin-right: 12px; font-size: 1.1rem;"></i>
       <input type="text" id="mobSearchInput" class="search-input" placeholder="Track AWB..." onkeypress="if(event.key === 'Enter') executeMobSearch()">
       <button class="btn-search" id="mobSearchBtn" onclick="executeMobSearch()"><i class="bi bi-arrow-right-short"></i></button>
       <div id="mobSearchAlert" class="search-alert"></div>
@@ -201,10 +202,11 @@
     </div>
     <div class="activity-list" id="recentActivityList">
       <div style="text-align: center; padding: 30px; color: #94a3b8;">
-        <span class="spinner-border spinner-border-sm"></span> Loading data...
+        <!-- Replaced the broken spinner class with the pure CSS animated icon -->
+        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 1.5rem; margin-bottom: 8px;"></i><br>
+        Loading data...
       </div>
     </div>
-  </div>
 
   <!-- INJECT COMMON NAVIGATION & MODAL SCRIPTS HERE -->
   <script src="/nav.js"></script>

@@ -21,6 +21,9 @@ function injectTrackingSystem() {
         70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
         100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
       }
+      
+      /* Loading Spinner for Search Button */
+      @keyframes spin { 100% { transform: rotate(360deg); } }
 
       /* Enhanced Tracking Top Card */
       .trk-hero-card {
@@ -43,60 +46,57 @@ function injectTrackingSystem() {
       .trk-country { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
       .trk-divider { color: #cbd5e0; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
 
-      /* --- NEW SMART STEPPER --- */
+      /* --- SMART STEPPER --- */
       .trk-stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 8px; }
       .trk-stepper-track { position: absolute; top: 12px; left: 15px; right: 15px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 2px; }
       .trk-stepper-progress { height: 100%; width: 0%; background: var(--brand-accent); transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 2px; }
       
       .trk-step { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; }
       
-      /* Dot Base */
       .trk-dot { 
         width: 28px; height: 28px; border-radius: 50%; background: #ffffff; 
         border: 4px solid #cbd5e0; transition: all 0.4s ease;
-        display: flex; align-items: center; justify-content: center;
+        display: flex; align-items: center; justify-content: center; box-sizing: border-box;
       }
       .trk-dot i { display: none; color: white; font-size: 1rem; }
       .trk-lbl { font-family: 'Lexend', sans-serif; font-size: 0.7rem; font-weight: 600; color: #94a3b8; margin-top: 8px; text-transform: uppercase; transition: color 0.4s ease;}
       
-      /* Active Pulse State */
       .trk-step.active-step .trk-dot { background: #ffffff; border-color: var(--brand-accent); border-width: 6px; animation: livePulse 2s infinite; }
       .trk-step.active-step .trk-lbl { color: var(--brand-accent); }
       
-      /* Completed Checkmark State */
       .trk-step.completed .trk-dot { background: var(--brand-accent); border-color: var(--brand-accent); border-width: 2px;}
       .trk-step.completed .trk-dot i { display: block; }
       .trk-step.completed .trk-lbl { color: var(--brand-accent); }
       
-      /* Success (Delivered) State */
       .trk-step.success.completed .trk-dot { background: #10b981; border-color: #10b981; }
       .trk-step.success.active-step .trk-dot { border-color: #10b981; animation: livePulseSuccess 2s infinite; }
       .trk-step.success .trk-lbl { color: #10b981; }
 
-      /* Error State */
       .trk-step.error .trk-dot { background: #ef4444; border-color: #ef4444; animation: none; }
       .trk-step.error .trk-lbl { color: #ef4444; }
 
-
-      /* --- NEW BULLETPROOF TIMELINE ALIGNMENT --- */
-      .trk-timeline { position: relative; padding-left: 8px; margin-top: 16px; }
+      /* --- PERFECTLY ALIGNED TIMELINE --- */
+      .trk-timeline { position: relative; padding-left: 0; margin-top: 16px; }
       
-      /* The Vertical Line */
-      .trk-timeline::before { content: ''; position: absolute; left: 19px; top: 12px; bottom: 30px; width: 2px; background: #e2e8f0; }
+      /* Vertical Line (Centered at 25px) */
+      .trk-timeline::before { content: ''; position: absolute; left: 24px; top: 12px; bottom: 30px; width: 2px; background: #e2e8f0; }
       
-      /* The Container for each row */
-      .trk-item { position: relative; padding-bottom: 28px; padding-left: 42px; opacity: 0; animation: fadeUpIn 0.6s ease forwards; }
+      /* Text Container */
+      .trk-item { position: relative; padding-bottom: 28px; padding-left: 56px; opacity: 0; animation: fadeUpIn 0.6s ease forwards; }
       
-      /* The Absolute Positioned Dot (Never moves regardless of text size) */
-      .trk-item-dot { width: 16px; height: 16px; border-radius: 50%; background: #ffffff; border: 4px solid #cbd5e0; position: absolute; left: 12px; top: 4px; z-index: 2; box-shadow: 0 0 0 6px var(--bg-color); transition: all 0.3s; }
+      /* The Dot (Width 16px. Centered at 25px means Left must be 17px) */
+      .trk-item-dot { 
+        box-sizing: border-box; width: 16px; height: 16px; border-radius: 50%; 
+        background: #ffffff; border: 4px solid #cbd5e0; 
+        position: absolute; left: 17px; top: 4px; z-index: 2; 
+        box-shadow: 0 0 0 5px var(--bg-color); transition: all 0.3s; 
+      }
       
-      .trk-item.active .trk-item-dot { background: var(--brand-accent); border-color: var(--brand-accent); box-shadow: 0 0 0 6px var(--bg-color), 0 0 0 10px rgba(79,70,229,0.1); animation: livePulse 2s infinite; }
-      .trk-item.active.success .trk-item-dot { background: #10b981; border-color: #10b981; animation: livePulseSuccess 2s infinite; box-shadow: 0 0 0 6px var(--bg-color), 0 0 0 10px rgba(16,185,129,0.1); }
+      .trk-item.active .trk-item-dot { background: var(--brand-accent); border-color: var(--brand-accent); box-shadow: 0 0 0 5px var(--bg-color), 0 0 0 10px rgba(79,70,229,0.1); animation: livePulse 2s infinite; }
+      .trk-item.active.success .trk-item-dot { background: #10b981; border-color: #10b981; animation: livePulseSuccess 2s infinite; box-shadow: 0 0 0 5px var(--bg-color), 0 0 0 10px rgba(16,185,129,0.1); }
       
-      /* The Text Content Container */
       .trk-content { min-width: 0; display: flex; flex-direction: column; }
       
-      /* Word Wrapping to keep it neat */
       .trk-status { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 4px; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; }
       .trk-date { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
       .trk-meta { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; font-size: 0.85rem; color: #475569; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); }
@@ -140,7 +140,8 @@ async function executeMobSearch() {
   if (!searchVal) return;
   
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm" style="width: 1.2rem; height: 1.2rem;"></span>';
+  // Apply circling animation to the icon
+  btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 1.2rem;"></i>';
   alertBox.style.display = 'none';
   
   try {
@@ -182,7 +183,6 @@ function renderBeautifulTracking(pkg, history) {
   const modal = document.getElementById('trackingSheetModal');
   const content = document.getElementById('trackingModalContent');
   
-  // Logic Engine for Stepper Checks & Pulses
   const s = String(pkg.status || '').toLowerCase();
   
   let step1 = '', step2 = '', step3 = '';
@@ -192,32 +192,30 @@ function renderBeautifulTracking(pkg, history) {
   if (s.includes('delivered')) {
     step1 = 'completed success';
     step2 = 'completed success';
-    step3 = 'completed success active-step'; // Pulses Green
+    step3 = 'completed success active-step';
     trackProgress = '100%';
     trackColor = '#10b981';
   } 
   else if (s.includes('return') || s.includes('cancel') || s.includes('exception')) {
     step1 = 'completed error';
-    step2 = 'error'; // Solid Red
+    step2 = 'error'; 
     step3 = '';
     trackProgress = '50%';
     trackColor = '#ef4444';
   } 
   else if (s === 'pending' || s === 'booked' || s.includes('picked')) {
-    step1 = 'active-step'; // Pulses Blue
+    step1 = 'active-step'; 
     step2 = '';
     step3 = '';
     trackProgress = '0%';
   } 
   else { 
-    // Transit Default
-    step1 = 'completed';   // Solid Blue with Checkmark
-    step2 = 'active-step'; // Pulses Blue
+    step1 = 'completed';   
+    step2 = 'active-step'; 
     step3 = '';
     trackProgress = '50%';
   }
 
-  // Build History HTML
   let historyHTML = '';
   if (!history || history.length === 0) {
     historyHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">No timeline available yet.</div>';
@@ -253,7 +251,6 @@ function renderBeautifulTracking(pkg, history) {
     });
   }
 
-  // Inject full HTML
   content.innerHTML = `
     <div class="trk-hero-card">
       <div class="trk-awb"><i class="bi bi-box-seam-fill" style="margin-right: 8px; color: var(--text-main);"></i>${pkg.id}</div>
