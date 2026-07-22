@@ -10,7 +10,7 @@ function injectTrackingSystem() {
         to { opacity: 1; transform: translateY(0); }
       }
       
-      /* Live Pulse Animation */
+      /* Live Pulse Animations */
       @keyframes livePulse {
         0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
         70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
@@ -43,47 +43,64 @@ function injectTrackingSystem() {
       .trk-country { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
       .trk-divider { color: #cbd5e0; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
 
-      /* Animated Stepper */
+      /* --- NEW SMART STEPPER --- */
       .trk-stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 8px; }
-      .trk-stepper-track { position: absolute; top: 10px; left: 15px; right: 15px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 2px; }
+      .trk-stepper-track { position: absolute; top: 12px; left: 15px; right: 15px; height: 4px; background: #e2e8f0; z-index: 1; border-radius: 2px; }
       .trk-stepper-progress { height: 100%; width: 0%; background: var(--brand-accent); transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 2px; }
       
       .trk-step { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; }
-      .trk-dot { width: 24px; height: 24px; border-radius: 50%; background: #ffffff; border: 4px solid #cbd5e0; transition: all 0.4s ease; }
+      
+      /* Dot Base */
+      .trk-dot { 
+        width: 28px; height: 28px; border-radius: 50%; background: #ffffff; 
+        border: 4px solid #cbd5e0; transition: all 0.4s ease;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .trk-dot i { display: none; color: white; font-size: 1rem; }
       .trk-lbl { font-family: 'Lexend', sans-serif; font-size: 0.7rem; font-weight: 600; color: #94a3b8; margin-top: 8px; text-transform: uppercase; transition: color 0.4s ease;}
       
-      /* Stepper States */
-      .trk-stepper.s-book .trk-step:nth-child(1) .trk-dot { border-color: var(--brand-accent); background: var(--brand-accent); animation: livePulse 2s infinite; }
-      .trk-stepper.s-book .trk-step:nth-child(1) .trk-lbl { color: var(--brand-accent); }
+      /* Active Pulse State */
+      .trk-step.active-step .trk-dot { background: #ffffff; border-color: var(--brand-accent); border-width: 6px; animation: livePulse 2s infinite; }
+      .trk-step.active-step .trk-lbl { color: var(--brand-accent); }
       
-      .trk-stepper.s-transit .trk-stepper-progress { width: 50%; }
-      .trk-stepper.s-transit .trk-step:nth-child(1) .trk-dot { border-color: var(--brand-accent); background: var(--brand-accent); }
-      .trk-stepper.s-transit .trk-step:nth-child(2) .trk-dot { border-color: var(--brand-accent); background: #ffffff; border-width: 6px; animation: livePulse 2s infinite; }
-      .trk-stepper.s-transit .trk-step:nth-child(2) .trk-lbl { color: var(--brand-accent); }
+      /* Completed Checkmark State */
+      .trk-step.completed .trk-dot { background: var(--brand-accent); border-color: var(--brand-accent); border-width: 2px;}
+      .trk-step.completed .trk-dot i { display: block; }
+      .trk-step.completed .trk-lbl { color: var(--brand-accent); }
       
-      .trk-stepper.s-delivered .trk-stepper-progress { background: #10b981; width: 100%; }
-      .trk-stepper.s-delivered .trk-step .trk-dot { border-color: #10b981; background: #10b981; }
-      .trk-stepper.s-delivered .trk-step:nth-child(3) .trk-dot { background: #ffffff; border-width: 6px; animation: livePulseSuccess 2s infinite; }
-      .trk-stepper.s-delivered .trk-lbl { color: #10b981; }
+      /* Success (Delivered) State */
+      .trk-step.success.completed .trk-dot { background: #10b981; border-color: #10b981; }
+      .trk-step.success.active-step .trk-dot { border-color: #10b981; animation: livePulseSuccess 2s infinite; }
+      .trk-step.success .trk-lbl { color: #10b981; }
 
-      .trk-stepper.s-exception .trk-stepper-progress { background: #ef4444; width: 50%; }
-      .trk-stepper.s-exception .trk-step .trk-dot { border-color: #ef4444; background: #ef4444; }
+      /* Error State */
+      .trk-step.error .trk-dot { background: #ef4444; border-color: #ef4444; animation: none; }
+      .trk-step.error .trk-lbl { color: #ef4444; }
 
-      /* Timeline Elements */
-      .trk-timeline { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 12px; margin-top: 16px; }
-      .trk-timeline::before { content: ''; position: absolute; left: 21px; top: 16px; bottom: 30px; width: 2px; background: #e2e8f0; }
+
+      /* --- NEW BULLETPROOF TIMELINE ALIGNMENT --- */
+      .trk-timeline { position: relative; padding-left: 8px; margin-top: 16px; }
       
-      .trk-item { position: relative; display: flex; gap: 20px; padding-bottom: 24px; opacity: 0; animation: fadeUpIn 0.6s ease forwards; }
-      .trk-item-dot { width: 16px; height: 16px; border-radius: 50%; background: #ffffff; border: 4px solid #cbd5e0; position: absolute; left: 2px; top: 2px; z-index: 2; box-shadow: 0 0 0 6px var(--bg-color); transition: all 0.3s; }
+      /* The Vertical Line */
+      .trk-timeline::before { content: ''; position: absolute; left: 19px; top: 12px; bottom: 30px; width: 2px; background: #e2e8f0; }
+      
+      /* The Container for each row */
+      .trk-item { position: relative; padding-bottom: 28px; padding-left: 42px; opacity: 0; animation: fadeUpIn 0.6s ease forwards; }
+      
+      /* The Absolute Positioned Dot (Never moves regardless of text size) */
+      .trk-item-dot { width: 16px; height: 16px; border-radius: 50%; background: #ffffff; border: 4px solid #cbd5e0; position: absolute; left: 12px; top: 4px; z-index: 2; box-shadow: 0 0 0 6px var(--bg-color); transition: all 0.3s; }
       
       .trk-item.active .trk-item-dot { background: var(--brand-accent); border-color: var(--brand-accent); box-shadow: 0 0 0 6px var(--bg-color), 0 0 0 10px rgba(79,70,229,0.1); animation: livePulse 2s infinite; }
       .trk-item.active.success .trk-item-dot { background: #10b981; border-color: #10b981; animation: livePulseSuccess 2s infinite; box-shadow: 0 0 0 6px var(--bg-color), 0 0 0 10px rgba(16,185,129,0.1); }
       
-      .trk-content { flex: 1; padding-top: 0; }
-      .trk-status { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 4px; }
+      /* The Text Content Container */
+      .trk-content { min-width: 0; display: flex; flex-direction: column; }
+      
+      /* Word Wrapping to keep it neat */
+      .trk-status { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 4px; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; }
       .trk-date { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
       .trk-meta { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 12px; font-size: 0.85rem; color: #475569; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); }
-      .trk-remark { color: var(--brand-accent); font-weight: 500; padding-top: 6px; border-top: 1px dashed var(--border-color); margin-top: 2px; }
+      .trk-remark { color: var(--brand-accent); font-weight: 500; padding-top: 6px; border-top: 1px dashed var(--border-color); margin-top: 2px; word-wrap: break-word; }
     </style>
   `;
 
@@ -113,7 +130,7 @@ function closeTrackingModal(e) {
   }
 }
 
-// 2. Main Search Execution (Triggered by dashboard input)
+// 2. Main Search Execution
 async function executeMobSearch() {
   const searchInput = document.getElementById('mobSearchInput');
   const btn = document.getElementById('mobSearchBtn');
@@ -165,14 +182,42 @@ function renderBeautifulTracking(pkg, history) {
   const modal = document.getElementById('trackingSheetModal');
   const content = document.getElementById('trackingModalContent');
   
-  // Determine Master Status
+  // Logic Engine for Stepper Checks & Pulses
   const s = String(pkg.status || '').toLowerCase();
-  let stepClass = 's-transit';
-  if (s.includes('delivered')) stepClass = 's-delivered';
-  else if (s.includes('return') || s.includes('cancel') || s.includes('exception')) stepClass = 's-exception';
-  else if (s === 'pending' || s === 'booked' || s.includes('picked')) stepClass = 's-book';
+  
+  let step1 = '', step2 = '', step3 = '';
+  let trackProgress = '0%';
+  let trackColor = 'var(--brand-accent)';
+  
+  if (s.includes('delivered')) {
+    step1 = 'completed success';
+    step2 = 'completed success';
+    step3 = 'completed success active-step'; // Pulses Green
+    trackProgress = '100%';
+    trackColor = '#10b981';
+  } 
+  else if (s.includes('return') || s.includes('cancel') || s.includes('exception')) {
+    step1 = 'completed error';
+    step2 = 'error'; // Solid Red
+    step3 = '';
+    trackProgress = '50%';
+    trackColor = '#ef4444';
+  } 
+  else if (s === 'pending' || s === 'booked' || s.includes('picked')) {
+    step1 = 'active-step'; // Pulses Blue
+    step2 = '';
+    step3 = '';
+    trackProgress = '0%';
+  } 
+  else { 
+    // Transit Default
+    step1 = 'completed';   // Solid Blue with Checkmark
+    step2 = 'active-step'; // Pulses Blue
+    step3 = '';
+    trackProgress = '50%';
+  }
 
-  // Build History HTML with staggered animation
+  // Build History HTML
   let historyHTML = '';
   if (!history || history.length === 0) {
     historyHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">No timeline available yet.</div>';
@@ -186,7 +231,6 @@ function renderBeautifulTracking(pkg, history) {
       const isDelivered = isNewest && s.includes('delivered');
       let activeClass = isNewest ? (isDelivered ? 'active success' : 'active') : '';
       
-      // Delay animation for a cascading effect
       const animDelay = `animation-delay: ${idx * 0.15}s;`;
       
       let rmkStr = (ev.remark || "").trim();
@@ -226,11 +270,23 @@ function renderBeautifulTracking(pkg, history) {
         </div>
       </div>
       
-      <div class="trk-stepper ${stepClass}">
-        <div class="trk-stepper-track"><div class="trk-stepper-progress"></div></div>
-        <div class="trk-step"><div class="trk-dot"></div><div class="trk-lbl">Origin</div></div>
-        <div class="trk-step"><div class="trk-dot"></div><div class="trk-lbl">Transit</div></div>
-        <div class="trk-step"><div class="trk-dot"></div><div class="trk-lbl">Dest</div></div>
+      <div class="trk-stepper">
+        <div class="trk-stepper-track"><div class="trk-stepper-progress" style="width: ${trackProgress}; background: ${trackColor};"></div></div>
+        
+        <div class="trk-step ${step1}">
+          <div class="trk-dot"><i class="bi bi-check-lg"></i></div>
+          <div class="trk-lbl">Origin</div>
+        </div>
+        
+        <div class="trk-step ${step2}">
+          <div class="trk-dot"><i class="bi bi-check-lg"></i></div>
+          <div class="trk-lbl">Transit</div>
+        </div>
+        
+        <div class="trk-step ${step3}">
+          <div class="trk-dot"><i class="bi bi-check-lg"></i></div>
+          <div class="trk-lbl">Dest</div>
+        </div>
       </div>
     </div>
 
