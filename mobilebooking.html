@@ -260,20 +260,18 @@
 
   // --- CONNECTION TO SCANNER.JS ---
   function triggerBookingScan(mode) {
-    // We call the openScanner function provided by scanner.js
     openScanner(mode, function(decodedText, returnedMode) {
-      
-      // Strip ALL spaces instantly from the decoded text using a clean regex replacement
-      const trimmedCode = decodedText.replace(/\s+/g, '');
-
       if (returnedMode === 'input') {
+        // Only in manual entry do we strip the space instantly
+        const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById('bookingID');
         inputField.value = trimmedCode;
-        inputField.focus(); // Highlights the field so the user sees it populated
+        inputField.focus(); 
         showAlert('success', 'Barcode scanned successfully.');
       } 
       else if (returnedMode === 'fetch') {
-        triggerApiFetch(trimmedCode);
+        // Pass the RAW barcode (with spaces) to the external API
+        triggerApiFetch(decodedText);
       }
     });
   }
@@ -337,35 +335,68 @@
     });
   }
 
-  // --- SCAN & FETCH SIMULATION LOGIC ---
-  function triggerApiFetch(scannedId) {
+  // --- LIVE SCAN & FETCH EXTERNAL API ---
+  async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
     document.getElementById('scanLoadingState').classList.remove('d-none');
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
-    // Simulate Network/API delay for data fetch
-    setTimeout(() => {
-      document.getElementById('scanLoadingState').classList.add('d-none');
-      
-      // Mock API Response Data
-      tempFetchedData = {
-        bookingID: scannedId,
-        shipper: "John Doe", shipperPhone: "968 99123456",
-        consignee: "Sarah Smith",
-        originCity: "Muscat", originCountry: "Oman",
-        destCity: "Dubai", destCountry: "UAE",
-        packageType: "Parcel", weight: "12.5", pcs: "2"
-      };
+    try {
+      const response = await fetch(GOOGLE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: "fetchExternalOrder",
+          orderNo: scannedId // e.g. "412 0431"
+        })
+      });
 
-      // Populate Preview UI
-      document.getElementById('fpId').innerText = tempFetchedData.bookingID;
-      document.getElementById('fpShipper').innerText = tempFetchedData.shipper;
-      document.getElementById('fpConsignee').innerText = tempFetchedData.consignee;
-      document.getElementById('fpWeight').innerText = tempFetchedData.weight + " KG / " + tempFetchedData.pcs + " PCS";
-      document.getElementById('fpRoute').innerText = tempFetchedData.originCity + " -> " + tempFetchedData.destCity;
-      
-      document.getElementById('scanResultState').classList.remove('d-none');
-    }, 1200);
+      const res = await response.json();
+      document.getElementById('scanLoadingState').classList.add('d-none');
+
+      // Verify the external API returned success and has data
+      if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data.length > 0) {
+        
+        const extData = res.apiData.data[0];
+
+        // Map Alfarha API fields to our system
+        tempFetchedData = {
+          // Force strip spaces from the ID before it gets saved into our local DB
+          bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
+          shipper: extData.agent_name || "",
+          shipperPhone: extData.agent_mobile || "",
+          consignee: extData.receiver_name || "",
+          originCity: extData.booking_branch || sessionUser.branch, 
+          originCountry: "Oman", // Outbound default
+          destCity: extData.receiver_district || "",
+          destCountry: extData.receiver_country || "",
+          packageType: extData.cargotype || "Parcel",
+          weight: extData.total_weight || "",
+          pcs: extData["total box"] || "1"
+        };
+
+        // Populate Preview UI
+        document.getElementById('fpId').innerText = tempFetchedData.bookingID;
+        document.getElementById('fpShipper').innerText = tempFetchedData.shipper;
+        document.getElementById('fpConsignee').innerText = tempFetchedData.consignee;
+        document.getElementById('fpWeight').innerText = tempFetchedData.weight + " KG / " + tempFetchedData.pcs + " PCS";
+        document.getElementById('fpRoute').innerText = tempFetchedData.originCity + " -> " + tempFetchedData.destCity;
+        
+        document.getElementById('scanResultState').classList.remove('d-none');
+
+      } else {
+        // API responded, but order was not found or token failed
+        const errMsg = res.apiData ? res.apiData.message : "Failed to retrieve order data.";
+        showAlert('danger', "External API: " + errMsg);
+        resetFetchState();
+      }
+
+    } catch (error) {
+      document.getElementById('scanLoadingState').classList.add('d-none');
+      showAlert('danger', "Network error connecting to master database.");
+      resetFetchState();
+    }
   }
 
   // Edit Fetched Data before saving
