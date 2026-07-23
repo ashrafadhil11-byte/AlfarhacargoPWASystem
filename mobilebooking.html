@@ -386,7 +386,7 @@
     if (html5QrCode && html5QrCode.isScanning) {
       html5QrCode.stop().catch((err) => { console.error("Failed to stop scanning.", err); });
     }
-    activeScannerMode = null;
+    activeScannerMode = null; // Cleared AFTER logic completes
   }
 
   // Triggered automatically when camera successfully reads a barcode
@@ -396,18 +396,21 @@
     
     playSuccessBeep();
 
-    // Pause the camera instantly to freeze the frame, then shut it down
+    // 1. Save the mode to a temporary variable BEFORE clearing it
+    const currentMode = activeScannerMode;
+
+    // 2. Pause the camera instantly to freeze the frame, then shut it down
     if (html5QrCode && html5QrCode.isScanning) { html5QrCode.pause(true); }
-    closeScanner();
+    closeScanner(); // <--- This sets activeScannerMode to null
     
-    // Give the DOM a moment to hide the modal before focusing the input
+    // 3. Process the data using the saved variable
     setTimeout(() => {
-      if (activeScannerMode === 'input') {
+      if (currentMode === 'input') {
         const inputField = document.getElementById('bookingID');
         inputField.value = decodedText;
         inputField.focus(); // Highlights the field so the user sees it populated
         showAlert('success', 'Barcode scanned successfully.');
-      } else if (activeScannerMode === 'fetch') {
+      } else if (currentMode === 'fetch') {
         triggerApiFetch(decodedText);
       }
       isProcessingScan = false;
