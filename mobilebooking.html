@@ -262,16 +262,18 @@
   function triggerBookingScan(mode) {
     // We call the openScanner function provided by scanner.js
     openScanner(mode, function(decodedText, returnedMode) {
+      
+      // Strip ALL spaces instantly from the decoded text using a clean regex replacement
+      const trimmedCode = decodedText.replace(/\s+/g, '');
+
       if (returnedMode === 'input') {
-        // Strip all spaces for manual entry field specifically
-        const trimmedCode = decodedText.replace(/\\s+/g, '');
         const inputField = document.getElementById('bookingID');
         inputField.value = trimmedCode;
         inputField.focus(); // Highlights the field so the user sees it populated
         showAlert('success', 'Barcode scanned successfully.');
       } 
       else if (returnedMode === 'fetch') {
-        triggerApiFetch(decodedText);
+        triggerApiFetch(trimmedCode);
       }
     });
   }
