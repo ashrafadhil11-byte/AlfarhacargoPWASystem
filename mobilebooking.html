@@ -116,7 +116,7 @@
 <!-- Live Camera Scanner Modal -->
 <div class="scanner-overlay" id="scannerOverlay">
   <div class="scanner-header">
-    <span style="font-weight: 600;">Scan Barcode</span>
+    <span style="font-weight: 600;">Scan QR Code</span>
     <i class="bi bi-x-lg" style="font-size: 1.5rem; cursor: pointer;" onclick="closeScanner()"></i>
   </div>
   <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px;">
@@ -138,7 +138,7 @@
     <div class="tabs-wrapper">
       <div class="admin-tabs">
         <button class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
-        <button class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-upc-scan"></i> Scan & Fetch</button>
+        <button class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-qr-code-scan"></i> Scan & Fetch</button>
         <button class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-cloud-upload"></i> Bulk CSV</button>
       </div>
     </div>
@@ -156,7 +156,7 @@
         <label class="input-label">Booking ID</label>
         <div class="input-with-btn">
           <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., AFC-1001" autocomplete="off">
-          <button class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-upc-scan"></i></button>
+          <button class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-qr-code-scan"></i></button>
         </div>
       </div>
       
@@ -196,10 +196,10 @@
     <div id="tab-fetch" class="content-card">
       
       <div id="scanHeroState" class="scan-hero">
-        <i class="bi bi-qr-code-scan"></i>
+        <i class="bi bi-qr-code"></i>
         <h3>Smart Scan & Add</h3>
-        <p>Scan a live barcode to pull details directly from the master software.</p>
-        <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
+        <p>Scan a live QR code to pull details directly from the master software.</p>
+        <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan QR Code</button>
       </div>
 
       <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
@@ -368,13 +368,13 @@
     activeScannerMode = null;
   }
 
-  // Triggered automatically when camera successfully reads a barcode/QR
+  // Triggered automatically when camera successfully reads a QR code
   function onScanSuccess(decodedText) {
     closeScanner(); // Close camera instantly
     
     if (activeScannerMode === 'input') {
       document.getElementById('bookingID').value = decodedText;
-      showAlert('success', 'Barcode scanned successfully.');
+      showAlert('success', 'QR code scanned successfully.');
     } else if (activeScannerMode === 'fetch') {
       triggerApiFetch(decodedText);
     }
