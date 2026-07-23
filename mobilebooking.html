@@ -81,6 +81,16 @@
     .scan-hero p { font-size: 0.85rem; opacity: 0.8; margin: 0 0 20px 0; }
     .btn-trigger-scan { background: #38bdf8; color: #0f172a; border: none; padding: 14px 24px; border-radius: 12px; font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
     
+    /* --- BOTTOM SHEETS MODAL --- */
+    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end; }
+    .bottom-sheet-overlay.active { opacity: 1; pointer-events: all; }
+    .bottom-sheet { background: var(--bg-color); width: 100%; max-height: 90vh; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+    .bottom-sheet-overlay.active .bottom-sheet { transform: translateY(0); }
+    .bs-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border-radius: 24px 24px 0 0; flex-shrink: 0; }
+    .bs-title { font-family: 'Lexend', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .bs-close { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;}
+    .bs-content { overflow-y: auto; padding: 20px; flex: 1; -webkit-overflow-scrolling: touch; }
+
     /* Premium Ticket Preview Card */
     .ticket-preview { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 20px; padding: 20px; border: 1px solid #cbd5e0; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
     .ticket-bg-icon { position: absolute; top: -20px; right: -20px; font-size: 8rem; color: rgba(255,255,255,0.6); pointer-events: none; }
@@ -192,57 +202,7 @@
       <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
         <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 2.5rem; color: var(--brand-accent); margin-bottom: 16px;"></i>
         <h4 style="font-family: 'Lexend'; color: var(--text-main);">Fetching Details...</h4>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">Pinging API for <span id="fetchingIdTxt" style="font-weight:bold;"></span></p>
-      </div>
-
-      <!-- REWORKED SMART TICKET UI -->
-      <div id="scanResultState" class="d-none">
-        <h3 class="form-section-title"><i class="bi bi-card-heading"></i> Digital Ticket</h3>
-        
-        <div class="ticket-preview">
-          <div class="ticket-bg-icon"><i class="bi bi-box-seam"></i></div>
-          
-          <div class="tp-header">
-            <div>
-              <div class="tp-label">Booking ID</div>
-              <div class="tp-id" id="fpId">---</div>
-            </div>
-            <span class="tp-badge"><i class="bi bi-check2-all"></i> Verified</span>
-          </div>
-
-          <div class="tp-route-box">
-            <div>
-              <div class="tp-route-label">Origin</div>
-              <div class="tp-route-value" id="fpOrigin">---</div>
-            </div>
-            <div>
-              <div class="tp-route-label">Destination</div>
-              <div class="tp-route-value" id="fpDest">---</div>
-            </div>
-          </div>
-
-          <div class="tp-details">
-            <div class="tp-row">
-              <span class="tp-row-label"><i class="bi bi-person-up"></i> Sender</span>
-              <span class="tp-row-val" id="fpShipper">---</span>
-            </div>
-            <div class="tp-row">
-              <span class="tp-row-label"><i class="bi bi-person-down"></i> Consignee</span>
-              <span class="tp-row-val" id="fpConsignee">---</span>
-            </div>
-            <div class="tp-row">
-              <span class="tp-row-label"><i class="bi bi-boxes"></i> Load</span>
-              <span class="tp-row-val" id="fpWeight">---</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 16px;">
-          <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-cloud-arrow-up-fill"></i> Save to System</button>
-          <button type="button" class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0;" onclick="editFetchedData()"><i class="bi bi-pencil-square"></i> Edit</button>
-        </div>
-        
-        <button type="button" class="btn-secondary-custom" style="background: transparent; border: 1px solid #e2e8f0; color: #64748b;" onclick="resetFetchState()">Discard & Scan Another</button>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Searching for <span id="fetchingIdTxt" style="font-weight:bold;"></span></p>
       </div>
 
     </div>
@@ -259,6 +219,64 @@
       <button type="button" id="submitBulkBtn" class="btn-primary-custom d-none" onclick="submitBulkBookings()">Process Upload</button>
     </div>
 
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- POPUP MODAL: FETCHED TICKET                    -->
+<!-- ============================================== -->
+<div class="bottom-sheet-overlay" id="fetchedTicketModal" onclick="closeTicketModal(event)">
+  <div class="bottom-sheet" style="max-height: 90vh;">
+    <div class="bs-header">
+      <h3 class="bs-title"><i class="bi bi-card-heading" style="color: var(--brand-accent);"></i> Digital Ticket</h3>
+      <button class="bs-close" onclick="closeTicketModal('force')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="bs-content">
+      
+      <div class="ticket-preview">
+        <div class="ticket-bg-icon"><i class="bi bi-box-seam"></i></div>
+        
+        <div class="tp-header">
+          <div>
+            <div class="tp-label">Booking ID</div>
+            <div class="tp-id" id="fpId">---</div>
+          </div>
+          <span class="tp-badge"><i class="bi bi-check2-all"></i> Verified</span>
+        </div>
+
+        <div class="tp-route-box">
+          <div>
+            <div class="tp-route-label">Origin</div>
+            <div class="tp-route-value" id="fpOrigin">---</div>
+          </div>
+          <div>
+            <div class="tp-route-label">Destination</div>
+            <div class="tp-route-value" id="fpDest">---</div>
+          </div>
+        </div>
+
+        <div class="tp-details">
+          <div class="tp-row">
+            <span class="tp-row-label"><i class="bi bi-person-up"></i> Sender</span>
+            <span class="tp-row-val" id="fpShipper">---</span>
+          </div>
+          <div class="tp-row">
+            <span class="tp-row-label"><i class="bi bi-person-down"></i> Consignee</span>
+            <span class="tp-row-val" id="fpConsignee">---</span>
+          </div>
+          <div class="tp-row">
+            <span class="tp-row-label"><i class="bi bi-boxes"></i> Load</span>
+            <span class="tp-row-val" id="fpWeight">---</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-cloud-arrow-up-fill"></i> Save to System</button>
+        <button type="button" class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0;" onclick="editFetchedData()"><i class="bi bi-pencil-square"></i> Edit</button>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -296,10 +314,21 @@
     setTimeout(() => alertBox.style.display = 'none', 5000);
   }
 
+  // Handle Modal Closing
+  function closeTicketModal(e) {
+    if (e === 'force' || (e && e.target.id === 'fetchedTicketModal')) {
+      document.getElementById('fetchedTicketModal').classList.remove('active');
+      // Reset background state
+      document.getElementById('scanLoadingState').classList.add('d-none');
+      document.getElementById('scanHeroState').classList.remove('d-none');
+    }
+  }
+
   // --- CONNECTION TO SCANNER.JS ---
   function triggerBookingScan(mode) {
     openScanner(mode, function(decodedText, returnedMode) {
       if (returnedMode === 'input') {
+        // Strip space for manual field entry
         const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById('bookingID');
         inputField.value = trimmedCode;
@@ -307,6 +336,7 @@
         showAlert('success', 'Barcode scanned successfully.');
       } 
       else if (returnedMode === 'fetch') {
+        // Pass the RAW barcode (with spaces) so the API finds it
         triggerApiFetch(decodedText);
       }
     });
@@ -389,15 +419,15 @@
       });
 
       const res = await response.json();
-      document.getElementById('scanLoadingState').classList.add('d-none');
-
-      // Verify the external API returned success[cite: 3]
+      
+      // Verify the external API returned success
       if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data.length > 0) {
         
         const extData = res.apiData.data[0];
 
         // Map Alfarha API fields to our local schema
         tempFetchedData = {
+          // Force strip spaces from the ID before it gets saved into our local DB
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
           shipper: extData.agent_name || "",
           shipperPhone: extData.agent_mobile || "",
@@ -411,7 +441,7 @@
           pcs: extData["total box"] || "1"
         };
 
-        // Populate the new Premium UI
+        // Populate the Premium Ticket UI
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
         document.getElementById('fpOrigin').innerText = tempFetchedData.originCity;
         
@@ -423,18 +453,22 @@
         document.getElementById('fpConsignee').innerText = tempFetchedData.consignee || "N/A";
         document.getElementById('fpWeight').innerText = `${tempFetchedData.weight} KG / ${tempFetchedData.pcs} PCS`;
         
-        document.getElementById('scanResultState').classList.remove('d-none');
+        // Hide Loader and Trigger Modal
+        document.getElementById('scanLoadingState').classList.add('d-none');
+        document.getElementById('scanHeroState').classList.remove('d-none');
+        document.getElementById('fetchedTicketModal').classList.add('active');
 
       } else {
+        document.getElementById('scanLoadingState').classList.add('d-none');
+        document.getElementById('scanHeroState').classList.remove('d-none');
         const errMsg = res.apiData ? res.apiData.message : "Failed to retrieve order data.";
         showAlert('danger', "External API: " + errMsg);
-        resetFetchState();
       }
 
     } catch (error) {
       document.getElementById('scanLoadingState').classList.add('d-none');
+      document.getElementById('scanHeroState').classList.remove('d-none');
       showAlert('danger', "Network error connecting to master database.");
-      resetFetchState();
     }
   }
 
@@ -453,8 +487,8 @@
     document.getElementById('weight').value = tempFetchedData.weight || '';
     document.getElementById('pcs').value = tempFetchedData.pcs || '';
 
+    closeTicketModal('force');
     switchTab('single', document.getElementById('tabBtnSingle'));
-    resetFetchState();
     showAlert('success', 'Data loaded successfully. You can now edit the details.');
   }
 
@@ -481,26 +515,20 @@
       const res = await response.json();
       
       if(res.success) {
-        showAlert('success', "API Data Saved Successfully!");
-        resetFetchState();
+        closeTicketModal('force');
+        showAlert('success', "Digital Ticket Saved Successfully!");
       } else {
         showAlert('danger', res.message || "Failed to save.");
-        btn.disabled = false; 
-        btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
       }
+      
+      btn.disabled = false; 
+      btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
+      
     } catch (error) {
       showAlert('danger', 'Network connection error.');
       btn.disabled = false; 
       btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
     }
-  }
-
-  function resetFetchState() {
-    tempFetchedData = null;
-    document.getElementById('scanResultState').classList.add('d-none');
-    document.getElementById('scanHeroState').classList.remove('d-none');
-    document.getElementById('submitFetchedBtn').disabled = false;
-    document.getElementById('submitFetchedBtn').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
   }
 
   // --- BULK UPLOAD ---
