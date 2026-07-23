@@ -116,7 +116,7 @@
 <!-- Live Camera Scanner Modal -->
 <div class="scanner-overlay" id="scannerOverlay">
   <div class="scanner-header">
-    <span style="font-weight: 600;">Scan QR Code</span>
+    <span style="font-weight: 600;">Scan Barcode</span>
     <i class="bi bi-x-lg" style="font-size: 1.5rem; cursor: pointer;" onclick="closeScanner()"></i>
   </div>
   <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px;">
@@ -137,8 +137,8 @@
     <!-- TABS -->
     <div class="tabs-wrapper">
       <div class="admin-tabs">
-        <button class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
-        <button class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-qr-code-scan"></i> Scan & Fetch</button>
+        <button id="tabBtnSingle" class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
+        <button class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-upc-scan"></i> Scan & Fetch</button>
         <button class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-cloud-upload"></i> Bulk CSV</button>
       </div>
     </div>
@@ -156,7 +156,7 @@
         <label class="input-label">Booking ID</label>
         <div class="input-with-btn">
           <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., AFC-1001" autocomplete="off">
-          <button class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-qr-code-scan"></i></button>
+          <button class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-upc-scan"></i></button>
         </div>
       </div>
       
@@ -196,10 +196,10 @@
     <div id="tab-fetch" class="content-card">
       
       <div id="scanHeroState" class="scan-hero">
-        <i class="bi bi-qr-code"></i>
+        <i class="bi bi-upc-scan"></i>
         <h3>Smart Scan & Add</h3>
-        <p>Scan a live QR code to pull details directly from the master software.</p>
-        <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan QR Code</button>
+        <p>Scan a live barcode to pull details directly from the master software.</p>
+        <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
       </div>
 
       <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
@@ -222,7 +222,11 @@
           <div class="fp-row"><span class="fp-label">Route:</span><span class="fp-value" id="fpRoute">---</span></div>
         </div>
 
-        <button id="submitFetchedBtn" class="btn-primary-custom" onclick="submitFetchedBooking()"><i class="bi bi-check-circle"></i> Confirm & Save</button>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-check-circle"></i> Confirm & Save</button>
+          <button class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #e2e8f0; color: #0f172a;" onclick="editFetchedData()"><i class="bi bi-pencil"></i> Edit</button>
+        </div>
+        
         <button class="btn-secondary-custom" onclick="resetFetchState()">Cancel & Scan Again</button>
       </div>
 
@@ -348,7 +352,8 @@
       html5QrCode = new Html5Qrcode("reader");
     }
     
-    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+    // Configured for optimal 1D Barcode reading
+    const config = { fps: 15, qrbox: { width: 280, height: 150 }, aspectRatio: 1.0 };
     
     // Launch rear camera
     html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
@@ -368,13 +373,13 @@
     activeScannerMode = null;
   }
 
-  // Triggered automatically when camera successfully reads a QR code
+  // Triggered automatically when camera successfully reads a barcode
   function onScanSuccess(decodedText) {
     closeScanner(); // Close camera instantly
     
     if (activeScannerMode === 'input') {
       document.getElementById('bookingID').value = decodedText;
-      showAlert('success', 'QR code scanned successfully.');
+      showAlert('success', 'Barcode scanned successfully.');
     } else if (activeScannerMode === 'fetch') {
       triggerApiFetch(decodedText);
     }
@@ -409,6 +414,28 @@
       
       document.getElementById('scanResultState').classList.remove('d-none');
     }, 1200);
+  }
+
+  // Edit Fetched Data before saving
+  function editFetchedData() {
+    if (!tempFetchedData) return;
+    
+    // Auto-fill the Manual Entry form
+    document.getElementById('bookingID').value = tempFetchedData.bookingID || '';
+    document.getElementById('shipper').value = tempFetchedData.shipper || '';
+    document.getElementById('shipperPhone').value = tempFetchedData.shipperPhone || '';
+    document.getElementById('consignee').value = tempFetchedData.consignee || '';
+    document.getElementById('originCity').value = tempFetchedData.originCity || '';
+    document.getElementById('originCountry').value = tempFetchedData.originCountry || '';
+    document.getElementById('destCity').value = tempFetchedData.destCity || '';
+    document.getElementById('destCountry').value = tempFetchedData.destCountry || '';
+    document.getElementById('weight').value = tempFetchedData.weight || '';
+    document.getElementById('pcs').value = tempFetchedData.pcs || '';
+
+    // Switch to Manual Entry Tab
+    switchTab('single', document.getElementById('tabBtnSingle'));
+    resetFetchState();
+    showAlert('success', 'Data loaded successfully. You can now edit the details.');
   }
 
   async function submitFetchedBooking() {
