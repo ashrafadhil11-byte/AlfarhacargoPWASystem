@@ -137,9 +137,9 @@
     <!-- TABS -->
     <div class="tabs-wrapper">
       <div class="admin-tabs">
-        <button id="tabBtnSingle" class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
-        <button class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-upc-scan"></i> Scan & Fetch</button>
-        <button class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-cloud-upload"></i> Bulk CSV</button>
+        <button type="button" id="tabBtnSingle" class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
+        <button type="button" class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-upc-scan"></i> Scan & Fetch</button>
+        <button type="button" class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-cloud-upload"></i> Bulk CSV</button>
       </div>
     </div>
 
@@ -156,7 +156,7 @@
         <label class="input-label">Booking ID</label>
         <div class="input-with-btn">
           <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., AFC-1001" autocomplete="off">
-          <button class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-upc-scan"></i></button>
+          <button type="button" class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-upc-scan"></i></button>
         </div>
       </div>
       
@@ -186,8 +186,8 @@
         <div class="input-group" style="flex:1;"><label class="input-label">Dest Country</label><input type="text" id="destCountry" class="minimal-input" placeholder="Country"></div>
       </div>
 
-      <button id="submitBtn" class="btn-primary-custom" onclick="submitBooking()">Submit Booking <i class="bi bi-arrow-right"></i></button>
-      <button class="btn-secondary-custom" onclick="clearSingleForm()">Clear Fields</button>
+      <button type="button" id="submitBtn" class="btn-primary-custom" onclick="submitBooking()">Submit Booking <i class="bi bi-arrow-right"></i></button>
+      <button type="button" class="btn-secondary-custom" onclick="clearSingleForm()">Clear Fields</button>
     </div>
 
     <!-- ============================================== -->
@@ -199,7 +199,7 @@
         <i class="bi bi-upc-scan"></i>
         <h3>Smart Scan & Add</h3>
         <p>Scan a live barcode to pull details directly from the master software.</p>
-        <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
+        <button type="button" class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
       </div>
 
       <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
@@ -223,11 +223,11 @@
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 16px;">
-          <button id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-check-circle"></i> Confirm & Save</button>
-          <button class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #e2e8f0; color: #0f172a;" onclick="editFetchedData()"><i class="bi bi-pencil"></i> Edit</button>
+          <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-check-circle"></i> Confirm & Save</button>
+          <button type="button" class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #e2e8f0; color: #0f172a;" onclick="editFetchedData()"><i class="bi bi-pencil"></i> Edit</button>
         </div>
         
-        <button class="btn-secondary-custom" onclick="resetFetchState()">Cancel & Scan Again</button>
+        <button type="button" class="btn-secondary-custom" onclick="resetFetchState()">Cancel & Scan Again</button>
       </div>
 
     </div>
@@ -241,7 +241,7 @@
         <i class="bi bi-file-earmark-spreadsheet upload-icon"></i>
         <div class="upload-text">Tap to select CSV file</div>
       </div>
-      <button id="submitBulkBtn" class="btn-primary-custom d-none" onclick="submitBulkBookings()">Process Upload</button>
+      <button type="button" id="submitBulkBtn" class="btn-primary-custom d-none" onclick="submitBulkBookings()">Process Upload</button>
     </div>
 
   </div>
@@ -251,7 +251,7 @@
 <script src="/nav.js"></script>
 
 <script>
-  // YOUR LIVE API URL (Make sure this matches your deployed script URL)
+  // YOUR LIVE API URL
   const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
 
   // Enforce Session
@@ -265,6 +265,7 @@
   var activeScannerMode = null; 
   var tempFetchedData = null; 
   let html5QrCode = null;
+  let isProcessingScan = false;
 
   // --- UI CONTROLLERS ---
   function switchTab(tabId, btnElement) {
@@ -282,6 +283,24 @@
     alertBox.innerHTML = `<i class="bi bi-${icon}"></i> ` + message; 
     alertBox.style.display = 'flex'; 
     setTimeout(() => alertBox.style.display = 'none', 5000);
+  }
+
+  // --- AUDIO FEEDBACK ---
+  function playSuccessBeep() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(850, ctx.currentTime); // High pitch beep
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime); // Volume
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+    } catch (e) { console.log('Audio feedback not supported in this browser environment.'); }
   }
 
   // --- SINGLE BOOKING ---
@@ -346,16 +365,15 @@
   // --- LIVE CAMERA SCANNER ---
   function openScanner(mode) {
     activeScannerMode = mode;
+    isProcessingScan = false;
     document.getElementById('scannerOverlay').classList.add('active');
     
     if (!html5QrCode) {
       html5QrCode = new Html5Qrcode("reader");
     }
     
-    // Configured for optimal 1D Barcode reading
     const config = { fps: 15, qrbox: { width: 280, height: 150 }, aspectRatio: 1.0 };
     
-    // Launch rear camera
     html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
       .catch((err) => {
         closeScanner();
@@ -366,23 +384,34 @@
   function closeScanner() {
     document.getElementById('scannerOverlay').classList.remove('active');
     if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode.stop().catch((err) => {
-        console.error("Failed to stop scanning.", err);
-      });
+      html5QrCode.stop().catch((err) => { console.error("Failed to stop scanning.", err); });
     }
     activeScannerMode = null;
   }
 
   // Triggered automatically when camera successfully reads a barcode
   function onScanSuccess(decodedText) {
-    closeScanner(); // Close camera instantly
+    if (isProcessingScan) return; // Prevent double firing
+    isProcessingScan = true;
     
-    if (activeScannerMode === 'input') {
-      document.getElementById('bookingID').value = decodedText;
-      showAlert('success', 'Barcode scanned successfully.');
-    } else if (activeScannerMode === 'fetch') {
-      triggerApiFetch(decodedText);
-    }
+    playSuccessBeep();
+
+    // Pause the camera instantly to freeze the frame, then shut it down
+    if (html5QrCode && html5QrCode.isScanning) { html5QrCode.pause(true); }
+    closeScanner();
+    
+    // Give the DOM a moment to hide the modal before focusing the input
+    setTimeout(() => {
+      if (activeScannerMode === 'input') {
+        const inputField = document.getElementById('bookingID');
+        inputField.value = decodedText;
+        inputField.focus(); // Highlights the field so the user sees it populated
+        showAlert('success', 'Barcode scanned successfully.');
+      } else if (activeScannerMode === 'fetch') {
+        triggerApiFetch(decodedText);
+      }
+      isProcessingScan = false;
+    }, 300);
   }
 
   // --- SCAN & FETCH SIMULATION LOGIC ---
@@ -420,7 +449,6 @@
   function editFetchedData() {
     if (!tempFetchedData) return;
     
-    // Auto-fill the Manual Entry form
     document.getElementById('bookingID').value = tempFetchedData.bookingID || '';
     document.getElementById('shipper').value = tempFetchedData.shipper || '';
     document.getElementById('shipperPhone').value = tempFetchedData.shipperPhone || '';
@@ -432,7 +460,6 @@
     document.getElementById('weight').value = tempFetchedData.weight || '';
     document.getElementById('pcs').value = tempFetchedData.pcs || '';
 
-    // Switch to Manual Entry Tab
     switchTab('single', document.getElementById('tabBtnSingle'));
     resetFetchState();
     showAlert('success', 'Data loaded successfully. You can now edit the details.');
