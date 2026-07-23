@@ -71,7 +71,8 @@
     /* Buttons */
     .btn-primary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: var(--brand-accent); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; transition: all 0.2s; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); margin-top: 10px;}
     .btn-primary-custom:disabled { opacity: 0.7; cursor: not-allowed; }
-    .btn-secondary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: #f1f5f9; color: #475569; border: none; padding: 16px; border-radius: 14px; width: 100%; margin-top: 12px; cursor: pointer; font-size: 0.95rem; }
+    .btn-secondary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: #f1f5f9; color: #475569; border: none; padding: 16px; border-radius: 14px; width: 100%; margin-top: 12px; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+    .btn-secondary-custom:hover { background: #e2e8f0; }
 
     /* Scan & Fetch UI */
     .scan-hero { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 40px 20px; text-align: center; color: white; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
@@ -80,14 +81,23 @@
     .scan-hero p { font-size: 0.85rem; opacity: 0.8; margin: 0 0 20px 0; }
     .btn-trigger-scan { background: #38bdf8; color: #0f172a; border: none; padding: 14px 24px; border-radius: 12px; font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
     
-    /* Fetched Data Preview Card */
-    .fetched-preview { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-    .fp-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e0; padding-bottom: 12px; margin-bottom: 12px; }
-    .fp-id { font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--brand-accent); font-size: 1.1rem; }
-    .fp-badge { background: #ecfdf5; color: #10b981; border: 1px solid #d1fae5; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-    .fp-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
-    .fp-label { color: var(--text-muted); font-weight: 600; }
-    .fp-value { color: var(--text-main); font-weight: 700; text-align: right; }
+    /* Premium Ticket Preview Card */
+    .ticket-preview { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 20px; padding: 20px; border: 1px solid #cbd5e0; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+    .ticket-bg-icon { position: absolute; top: -20px; right: -20px; font-size: 8rem; color: rgba(255,255,255,0.6); pointer-events: none; }
+    .tp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; position: relative; z-index: 2; }
+    .tp-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .tp-id { font-family: 'Lexend', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--brand-accent); }
+    .tp-badge { background: #10b981; color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 4px 10px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 4px; }
+    
+    .tp-route-box { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #ffffff; position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tp-route-label { font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 2px;}
+    .tp-route-value { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.95rem; color: #0f172a; line-height: 1.2; word-wrap: break-word; }
+    
+    .tp-details { display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2; }
+    .tp-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e0; padding-bottom: 8px; }
+    .tp-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tp-row-label { color: #475569; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .tp-row-val { color: #0f172a; font-size: 0.9rem; font-weight: 700; text-align: right; max-width: 60%; word-wrap: break-word; }
 
     /* Alerts */
     .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
@@ -185,26 +195,54 @@
         <p style="color: var(--text-muted); font-size: 0.85rem;">Pinging API for <span id="fetchingIdTxt" style="font-weight:bold;"></span></p>
       </div>
 
+      <!-- REWORKED SMART TICKET UI -->
       <div id="scanResultState" class="d-none">
-        <h3 class="form-section-title"><i class="bi bi-cloud-check"></i> Fetched Details</h3>
+        <h3 class="form-section-title"><i class="bi bi-card-heading"></i> Digital Ticket</h3>
         
-        <div class="fetched-preview">
-          <div class="fp-header">
-            <span class="fp-id" id="fpId">---</span>
-            <span class="fp-badge">Data Verified</span>
+        <div class="ticket-preview">
+          <div class="ticket-bg-icon"><i class="bi bi-box-seam"></i></div>
+          
+          <div class="tp-header">
+            <div>
+              <div class="tp-label">Booking ID</div>
+              <div class="tp-id" id="fpId">---</div>
+            </div>
+            <span class="tp-badge"><i class="bi bi-check2-all"></i> Verified</span>
           </div>
-          <div class="fp-row"><span class="fp-label">Shipper:</span><span class="fp-value" id="fpShipper">---</span></div>
-          <div class="fp-row"><span class="fp-label">Consignee:</span><span class="fp-value" id="fpConsignee">---</span></div>
-          <div class="fp-row"><span class="fp-label">Weight:</span><span class="fp-value" id="fpWeight">--- KG</span></div>
-          <div class="fp-row"><span class="fp-label">Route:</span><span class="fp-value" id="fpRoute">---</span></div>
+
+          <div class="tp-route-box">
+            <div>
+              <div class="tp-route-label">Origin</div>
+              <div class="tp-route-value" id="fpOrigin">---</div>
+            </div>
+            <div>
+              <div class="tp-route-label">Destination</div>
+              <div class="tp-route-value" id="fpDest">---</div>
+            </div>
+          </div>
+
+          <div class="tp-details">
+            <div class="tp-row">
+              <span class="tp-row-label"><i class="bi bi-person-up"></i> Sender</span>
+              <span class="tp-row-val" id="fpShipper">---</span>
+            </div>
+            <div class="tp-row">
+              <span class="tp-row-label"><i class="bi bi-person-down"></i> Consignee</span>
+              <span class="tp-row-val" id="fpConsignee">---</span>
+            </div>
+            <div class="tp-row">
+              <span class="tp-row-label"><i class="bi bi-boxes"></i> Load</span>
+              <span class="tp-row-val" id="fpWeight">---</span>
+            </div>
+          </div>
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 16px;">
-          <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-check-circle"></i> Confirm & Save</button>
-          <button type="button" class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #e2e8f0; color: #0f172a;" onclick="editFetchedData()"><i class="bi bi-pencil"></i> Edit</button>
+          <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-cloud-arrow-up-fill"></i> Save to System</button>
+          <button type="button" class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0;" onclick="editFetchedData()"><i class="bi bi-pencil-square"></i> Edit</button>
         </div>
         
-        <button type="button" class="btn-secondary-custom" onclick="resetFetchState()">Cancel & Scan Again</button>
+        <button type="button" class="btn-secondary-custom" style="background: transparent; border: 1px solid #e2e8f0; color: #64748b;" onclick="resetFetchState()">Discard & Scan Another</button>
       </div>
 
     </div>
@@ -262,7 +300,6 @@
   function triggerBookingScan(mode) {
     openScanner(mode, function(decodedText, returnedMode) {
       if (returnedMode === 'input') {
-        // Only in manual entry do we strip the space instantly
         const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById('bookingID');
         inputField.value = trimmedCode;
@@ -270,7 +307,6 @@
         showAlert('success', 'Barcode scanned successfully.');
       } 
       else if (returnedMode === 'fetch') {
-        // Pass the RAW barcode (with spaces) to the external API
         triggerApiFetch(decodedText);
       }
     });
@@ -348,45 +384,48 @@
         redirect: 'follow',
         body: JSON.stringify({
           action: "fetchExternalOrder",
-          orderNo: scannedId // e.g. "412 0431"
+          orderNo: scannedId 
         })
       });
 
       const res = await response.json();
       document.getElementById('scanLoadingState').classList.add('d-none');
 
-      // Verify the external API returned success and has data
+      // Verify the external API returned success[cite: 3]
       if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data.length > 0) {
         
         const extData = res.apiData.data[0];
 
-        // Map Alfarha API fields to our system
+        // Map Alfarha API fields to our local schema
         tempFetchedData = {
-          // Force strip spaces from the ID before it gets saved into our local DB
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
           shipper: extData.agent_name || "",
           shipperPhone: extData.agent_mobile || "",
           consignee: extData.receiver_name || "",
           originCity: extData.booking_branch || sessionUser.branch, 
-          originCountry: "Oman", // Outbound default
+          originCountry: "Oman", 
           destCity: extData.receiver_district || "",
           destCountry: extData.receiver_country || "",
           packageType: extData.cargotype || "Parcel",
-          weight: extData.total_weight || "",
+          weight: extData.total_weight || "0",
           pcs: extData["total box"] || "1"
         };
 
-        // Populate Preview UI
+        // Populate the new Premium UI
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
-        document.getElementById('fpShipper').innerText = tempFetchedData.shipper;
-        document.getElementById('fpConsignee').innerText = tempFetchedData.consignee;
-        document.getElementById('fpWeight').innerText = tempFetchedData.weight + " KG / " + tempFetchedData.pcs + " PCS";
-        document.getElementById('fpRoute').innerText = tempFetchedData.originCity + " -> " + tempFetchedData.destCity;
+        document.getElementById('fpOrigin').innerText = tempFetchedData.originCity;
+        
+        let destinationFull = tempFetchedData.destCity;
+        if(tempFetchedData.destCountry) destinationFull += ", " + tempFetchedData.destCountry;
+        document.getElementById('fpDest').innerText = destinationFull || "N/A";
+        
+        document.getElementById('fpShipper').innerText = tempFetchedData.shipper || "N/A";
+        document.getElementById('fpConsignee').innerText = tempFetchedData.consignee || "N/A";
+        document.getElementById('fpWeight').innerText = `${tempFetchedData.weight} KG / ${tempFetchedData.pcs} PCS`;
         
         document.getElementById('scanResultState').classList.remove('d-none');
 
       } else {
-        // API responded, but order was not found or token failed
         const errMsg = res.apiData ? res.apiData.message : "Failed to retrieve order data.";
         showAlert('danger', "External API: " + errMsg);
         resetFetchState();
@@ -447,12 +486,12 @@
       } else {
         showAlert('danger', res.message || "Failed to save.");
         btn.disabled = false; 
-        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
       }
     } catch (error) {
       showAlert('danger', 'Network connection error.');
       btn.disabled = false; 
-      btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
+      btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
     }
   }
 
@@ -461,7 +500,7 @@
     document.getElementById('scanResultState').classList.add('d-none');
     document.getElementById('scanHeroState').classList.remove('d-none');
     document.getElementById('submitFetchedBtn').disabled = false;
-    document.getElementById('submitFetchedBtn').innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
+    document.getElementById('submitFetchedBtn').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
   }
 
   // --- BULK UPLOAD ---
