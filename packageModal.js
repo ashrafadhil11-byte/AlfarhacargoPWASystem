@@ -122,12 +122,55 @@ async function openPackageModal(awb) {
           </div>
         </div>
         
-        <button onclick="closePkgModal('force')" style="width: 100%; padding: 14px; border-radius: 12px; border: none; background: #f1f5f9; color: #475569; font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer;">Close Details</button>
+        <div style="display: flex; gap: 10px;">
+          <button onclick="closePkgModal('force')" style="flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-muted); font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer;">Close</button>
+          <button onclick="triggerDirectTracking('${pkg.id}')" style="flex: 2; padding: 14px; border-radius: 12px; border: none; background: var(--brand-accent); color: white; font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer;"><i class="bi bi-radar" style="margin-right: 6px;"></i> Track Package</button>
+        </div>
       `;
     } else {
       content.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">Error: ${res.message}</div>`;
     }
   } catch (error) {
     content.innerHTML = `<div style="text-align:center; color:#ef4444; padding:20px;">Network Error: Please check your connection.</div>`;
+  }
+}
+
+// 4. Programmatic Tracking Integration 
+async function triggerDirectTracking(awb) {
+  closePkgModal('force'); 
+  
+  // Check if we are on a page with the search bar (like the dashboard)
+  const searchInput = document.getElementById('mobSearchInput');
+  const searchBtn = document.getElementById('mobSearchBtn');
+  
+  if (searchInput && searchBtn && typeof executeMobSearch === 'function') {
+    searchInput.value = awb;
+    executeMobSearch();
+  } else {
+    // Standalone programmatic fallback if no search bar exists
+    const trackingModal = document.getElementById('trackingSheetModal');
+    const trackingContent = document.getElementById('trackingModalContent');
+    
+    if (!trackingModal || !trackingContent) return alert('Tracking module is not loaded on this page.');
+    
+    trackingModal.classList.add('active');
+    trackingContent.innerHTML = '<div style="text-align:center; padding: 40px; color: #94a3b8;"><i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; font-size: 2rem;"></i><br><br>Locating Package...</div>';
+    
+    try {
+      const response = await fetch(GOOGLE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: "fetchCompleteTracking", searchQuery: awb })
+      });
+      const res = await response.json();
+      
+      if (res.success && typeof renderBeautifulTracking === 'function') {
+        renderBeautifulTracking(res.details, res.history);
+      } else {
+        trackingContent.innerHTML = `<div style="text-align:center; color:#ef4444; padding:30px;"><i class="bi bi-exclamation-circle" style="font-size: 2rem;"></i><br><br>${res.message || 'Tracking failed'}</div>`;
+      }
+    } catch (e) {
+      trackingContent.innerHTML = `<div style="text-align:center; color:#ef4444; padding:30px;"><i class="bi bi-wifi-off" style="font-size: 2rem;"></i><br><br>Connection Error</div>`;
+    }
   }
 }

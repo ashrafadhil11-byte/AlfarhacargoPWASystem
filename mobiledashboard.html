@@ -159,7 +159,6 @@
 
     <!-- Search Box -->
     <div class="mobile-search-box">
-      <!-- Added a specific right margin to perfectly space out the icon from the text -->
       <i class="bi bi-search text-muted" style="margin-right: 12px; font-size: 1.1rem;"></i>
       <input type="text" id="mobSearchInput" class="search-input" placeholder="Track AWB..." onkeypress="if(event.key === 'Enter') executeMobSearch()">
       <button class="btn-search" id="mobSearchBtn" onclick="executeMobSearch()"><i class="bi bi-arrow-right-short"></i></button>
@@ -202,13 +201,13 @@
     </div>
     <div class="activity-list" id="recentActivityList">
       <div style="text-align: center; padding: 30px; color: #94a3b8;">
-        <!-- Replaced the broken spinner class with the pure CSS animated icon -->
         <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 1.5rem; margin-bottom: 8px;"></i><br>
         Loading data...
       </div>
     </div>
 
   <!-- INJECT COMMON NAVIGATION & MODAL SCRIPTS HERE -->
+  <!-- STRICT ORDER: Notifications -> Nav -> Modals -> Tracking -->
   <script src="/notifications.js"></script>
   <script src="/nav.js"></script>
   <script src="/packageModal.js"></script>
@@ -266,6 +265,7 @@
   const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
 
   var sessionUser = JSON.parse(localStorage.getItem('afc_user'));
+  var activeDeliveryPkg = null;
 
   function initMobileDashboard() {
     if(!sessionUser) {
@@ -336,7 +336,7 @@
         redirect: 'follow',
         body: JSON.stringify({
           action: "getDashboardSummary",
-          branch: sessionUser.branch,   // This line guarantees branch filtering
+          branch: sessionUser.branch,
           role: sessionUser.role
         })
       });
