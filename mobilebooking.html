@@ -94,17 +94,6 @@
     .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
 
-    /* Live Scanner Overlay */
-    .scanner-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 3000; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-    .scanner-overlay.active { opacity: 1; pointer-events: all; }
-    .scanner-header { display: flex; justify-content: space-between; padding: 20px; color: white; font-family: 'Lexend', sans-serif; }
-    
-    /* Camera Reader Specifics */
-    #reader { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #000; border: none !important;}
-    #reader video { border-radius: 16px; object-fit: cover; }
-    #reader__scan_region { background: #000; }
-    #reader__dashboard_section_csr span, #reader__dashboard_section_swaplink { color: white !important; font-family: 'Lexend', sans-serif; }
-    
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -112,18 +101,6 @@
   </style>
 </head>
 <body>
-
-<!-- Live Camera Scanner Modal -->
-<div class="scanner-overlay" id="scannerOverlay">
-  <div class="scanner-header">
-    <span style="font-weight: 600;">Scan Barcode</span>
-    <i class="bi bi-x-lg" style="font-size: 1.5rem; cursor: pointer;" onclick="closeScanner()"></i>
-  </div>
-  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px;">
-    <!-- The camera feed drops into this div automatically -->
-    <div id="reader"></div>
-  </div>
-</div>
 
 <div class="mobile-app">
   <div class="bg-glow"></div>
@@ -156,7 +133,7 @@
         <label class="input-label">Booking ID</label>
         <div class="input-with-btn">
           <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., AFC-1001" autocomplete="off">
-          <button type="button" class="btn-scan-input" onclick="openScanner('input')"><i class="bi bi-upc-scan"></i></button>
+          <button type="button" class="btn-scan-input" onclick="triggerBookingScan('input')"><i class="bi bi-upc-scan"></i></button>
         </div>
       </div>
       
@@ -199,7 +176,7 @@
         <i class="bi bi-upc-scan"></i>
         <h3>Smart Scan & Add</h3>
         <p>Scan a live barcode to pull details directly from the master software.</p>
-        <button type="button" class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
+        <button type="button" class="btn-trigger-scan" onclick="triggerBookingScan('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
       </div>
 
       <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
@@ -247,7 +224,8 @@
   </div>
 </div>
 
-<!-- INJECT COMMON NAVIGATION HERE -->
+<!-- INJECT MODULAR SCRIPTS HERE -->
+<script src="/scanner.js"></script>
 <script src="/nav.js"></script>
 
 <script>
@@ -256,16 +234,11 @@
 
   // Enforce Session
   var sessionUser = JSON.parse(localStorage.getItem('afc_user'));
-  if(!sessionUser) {
-    window.location.href = '/login.html';
-  }
+  if(!sessionUser) { window.location.href = '/login.html'; }
 
   // Globals
   var parsedBulkData = []; 
-  var activeScannerMode = null; 
   var tempFetchedData = null; 
-  let html5QrCode = null;
-  let isProcessingScan = false;
 
   // --- UI CONTROLLERS ---
   function switchTab(tabId, btnElement) {
@@ -285,22 +258,22 @@
     setTimeout(() => alertBox.style.display = 'none', 5000);
   }
 
-  // --- AUDIO FEEDBACK ---
-  function playSuccessBeep() {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(850, ctx.currentTime); // High pitch beep
-      gainNode.gain.setValueAtTime(0.3, ctx.currentTime); // Volume
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch (e) { console.log('Audio feedback not supported in this browser environment.'); }
+  // --- CONNECTION TO SCANNER.JS ---
+  function triggerBookingScan(mode) {
+    // We call the openScanner function provided by scanner.js
+    openScanner(mode, function(decodedText, returnedMode) {
+      if (returnedMode === 'input') {
+        // Strip all spaces for manual entry field specifically
+        const trimmedCode = decodedText.replace(/\\s+/g, '');
+        const inputField = document.getElementById('bookingID');
+        inputField.value = trimmedCode;
+        inputField.focus(); // Highlights the field so the user sees it populated
+        showAlert('success', 'Barcode scanned successfully.');
+      } 
+      else if (returnedMode === 'fetch') {
+        triggerApiFetch(decodedText);
+      }
+    });
   }
 
   // --- SINGLE BOOKING ---
@@ -360,61 +333,6 @@
     ['bookingID', 'shipper', 'shipperPhone', 'consignee', 'originCity', 'originCountry', 'destCity', 'destCountry', 'weight', 'pcs'].forEach(id => {
       document.getElementById(id).value = '';
     });
-  }
-
-  // --- LIVE CAMERA SCANNER ---
-  function openScanner(mode) {
-    activeScannerMode = mode;
-    isProcessingScan = false;
-    document.getElementById('scannerOverlay').classList.add('active');
-    
-    if (!html5QrCode) {
-      html5QrCode = new Html5Qrcode("reader");
-    }
-    
-    const config = { fps: 15, qrbox: { width: 280, height: 150 }, aspectRatio: 1.0 };
-    
-    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-      .catch((err) => {
-        closeScanner();
-        showAlert('danger', 'Camera access denied or unavailable. Check browser permissions.');
-      });
-  }
-
-  function closeScanner() {
-    document.getElementById('scannerOverlay').classList.remove('active');
-    if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode.stop().catch((err) => { console.error("Failed to stop scanning.", err); });
-    }
-    activeScannerMode = null; // Cleared AFTER logic completes
-  }
-
-  // Triggered automatically when camera successfully reads a barcode
-  function onScanSuccess(decodedText) {
-    if (isProcessingScan) return; // Prevent double firing
-    isProcessingScan = true;
-    
-    playSuccessBeep();
-
-    // 1. Save the mode to a temporary variable BEFORE clearing it
-    const currentMode = activeScannerMode;
-
-    // 2. Pause the camera instantly to freeze the frame, then shut it down
-    if (html5QrCode && html5QrCode.isScanning) { html5QrCode.pause(true); }
-    closeScanner(); // <--- This sets activeScannerMode to null
-    
-    // 3. Process the data using the saved variable
-    setTimeout(() => {
-      if (currentMode === 'input') {
-        const inputField = document.getElementById('bookingID');
-        inputField.value = decodedText;
-        inputField.focus(); // Highlights the field so the user sees it populated
-        showAlert('success', 'Barcode scanned successfully.');
-      } else if (currentMode === 'fetch') {
-        triggerApiFetch(decodedText);
-      }
-      isProcessingScan = false;
-    }, 300);
   }
 
   // --- SCAN & FETCH SIMULATION LOGIC ---
