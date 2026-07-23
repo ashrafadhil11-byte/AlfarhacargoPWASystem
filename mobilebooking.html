@@ -8,9 +8,13 @@
   <meta name="theme-color" content="#f8fafc">
   <title>Book Package - Al-Farha Cargo</title>
 
+  <link rel="manifest" href="/manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  
+  <!-- Required Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
     :root { 
@@ -66,6 +70,7 @@
     
     /* Buttons */
     .btn-primary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: var(--brand-accent); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; transition: all 0.2s; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); margin-top: 10px;}
+    .btn-primary-custom:disabled { opacity: 0.7; cursor: not-allowed; }
     .btn-secondary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: #f1f5f9; color: #475569; border: none; padding: 16px; border-radius: 14px; width: 100%; margin-top: 12px; cursor: pointer; font-size: 0.95rem; }
 
     /* Scan & Fetch UI */
@@ -84,38 +89,39 @@
     .fp-label { color: var(--text-muted); font-weight: 600; }
     .fp-value { color: var(--text-main); font-weight: 700; text-align: right; }
 
-    /* Alerts & Modals */
+    /* Alerts */
     .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
     .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
 
-    /* Scanner Overlay Mockup */
-    .scanner-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 3000; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    /* Live Scanner Overlay */
+    .scanner-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 3000; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .scanner-overlay.active { opacity: 1; pointer-events: all; }
     .scanner-header { display: flex; justify-content: space-between; padding: 20px; color: white; font-family: 'Lexend', sans-serif; }
-    .scanner-viewfinder { flex: 1; border: 2px solid rgba(255,255,255,0.2); margin: 40px; position: relative; display: flex; align-items: center; justify-content: center;}
-    .scanner-line { width: 100%; height: 2px; background: #ef4444; position: absolute; box-shadow: 0 0 10px #ef4444; animation: scanAnim 2s infinite linear; }
+    
+    /* Camera Reader Specifics */
+    #reader { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #000; border: none !important;}
+    #reader video { border-radius: 16px; object-fit: cover; }
+    #reader__scan_region { background: #000; }
+    #reader__dashboard_section_csr span, #reader__dashboard_section_swaplink { color: white !important; font-family: 'Lexend', sans-serif; }
     
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @keyframes scanAnim { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<!-- Scanner Modal -->
+<!-- Live Camera Scanner Modal -->
 <div class="scanner-overlay" id="scannerOverlay">
   <div class="scanner-header">
     <span style="font-weight: 600;">Scan Barcode</span>
     <i class="bi bi-x-lg" style="font-size: 1.5rem; cursor: pointer;" onclick="closeScanner()"></i>
   </div>
-  <div class="scanner-viewfinder">
-    <div class="scanner-line"></div>
-    <span style="color: rgba(255,255,255,0.5); font-family: monospace;">CAMERA ACTIVE</span>
-  </div>
-  <div style="padding: 20px; text-align: center;">
-    <button class="btn-trigger-scan" onclick="simulateSuccessfulScan()">Simulate Scan Detection</button>
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 20px;">
+    <!-- The camera feed drops into this div automatically -->
+    <div id="reader"></div>
   </div>
 </div>
 
@@ -128,6 +134,7 @@
       <p class="page-subtitle">Draft or fetch packages securely.</p>
     </div>
 
+    <!-- TABS -->
     <div class="tabs-wrapper">
       <div class="admin-tabs">
         <button class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
@@ -136,9 +143,12 @@
       </div>
     </div>
 
+    <!-- GLOBAL ALERT -->
     <div id="booking-alert" class="custom-alert"></div>
 
-    <!-- TAB 1: SINGLE ENTRY -->
+    <!-- ============================================== -->
+    <!-- TAB 1: SINGLE ENTRY                            -->
+    <!-- ============================================== -->
     <div id="tab-single" class="content-card active">
       <h3 class="form-section-title"><i class="bi bi-box-seam"></i> Identifiers</h3>
       
@@ -180,18 +190,19 @@
       <button class="btn-secondary-custom" onclick="clearSingleForm()">Clear Fields</button>
     </div>
 
-    <!-- TAB 2: SCAN & FETCH -->
+    <!-- ============================================== -->
+    <!-- TAB 2: SCAN & FETCH                            -->
+    <!-- ============================================== -->
     <div id="tab-fetch" class="content-card">
       
       <div id="scanHeroState" class="scan-hero">
         <i class="bi bi-qr-code-scan"></i>
         <h3>Smart Scan & Add</h3>
-        <p>Scan a pre-generated barcode to pull details directly from the master software.</p>
+        <p>Scan a live barcode to pull details directly from the master software.</p>
         <button class="btn-trigger-scan" onclick="openScanner('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
       </div>
 
       <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
-        <!-- Replacing bootstrap spinner with pure CSS animation for standalone PWA -->
         <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 2.5rem; color: var(--brand-accent); margin-bottom: 16px;"></i>
         <h4 style="font-family: 'Lexend'; color: var(--text-main);">Fetching Details...</h4>
         <p style="color: var(--text-muted); font-size: 0.85rem;">Pinging API for <span id="fetchingIdTxt" style="font-weight:bold;"></span></p>
@@ -217,7 +228,9 @@
 
     </div>
 
-    <!-- TAB 3: BULK UPLOAD -->
+    <!-- ============================================== -->
+    <!-- TAB 3: BULK UPLOAD                             -->
+    <!-- ============================================== -->
     <div id="tab-bulk" class="content-card">
       <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
       <div class="upload-zone" onclick="document.getElementById('csvFileInput').click()">
@@ -228,26 +241,28 @@
     </div>
 
   </div>
-
 </div>
 
 <!-- INJECT COMMON NAVIGATION HERE -->
 <script src="/nav.js"></script>
 
 <script>
-  // YOUR LIVE API URL
+  // YOUR LIVE API URL (Make sure this matches your deployed script URL)
   const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
 
+  // Enforce Session
   var sessionUser = JSON.parse(localStorage.getItem('afc_user'));
-  
   if(!sessionUser) {
     window.location.href = '/login.html';
   }
 
+  // Globals
   var parsedBulkData = []; 
-  var activeScannerMode = null; // 'input' or 'fetch'
-  var tempFetchedData = null; // Stores API data before submission
+  var activeScannerMode = null; 
+  var tempFetchedData = null; 
+  let html5QrCode = null;
 
+  // --- UI CONTROLLERS ---
   function switchTab(tabId, btnElement) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     btnElement.classList.add('active');
@@ -265,7 +280,7 @@
     setTimeout(() => alertBox.style.display = 'none', 5000);
   }
 
-  // --- SINGLE BOOKING LOGIC ---
+  // --- SINGLE BOOKING ---
   async function submitBooking() {
     const btn = document.getElementById('submitBtn'); 
     const customId = document.getElementById('bookingID').value.trim();
@@ -324,37 +339,54 @@
     });
   }
 
-  // --- SCAN & FETCH API LOGIC ---
+  // --- LIVE CAMERA SCANNER ---
   function openScanner(mode) {
     activeScannerMode = mode;
     document.getElementById('scannerOverlay').classList.add('active');
-    // NOTE: In production, integrate HTML5-QRCode or QuaggaJS initialization here.
+    
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader");
+    }
+    
+    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+    
+    // Launch rear camera
+    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+      .catch((err) => {
+        closeScanner();
+        showAlert('danger', 'Camera access denied or unavailable. Check browser permissions.');
+      });
   }
 
   function closeScanner() {
     document.getElementById('scannerOverlay').classList.remove('active');
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().catch((err) => {
+        console.error("Failed to stop scanning.", err);
+      });
+    }
     activeScannerMode = null;
   }
 
-  // MOCK FUNCTION: Simulates the camera successfully reading a barcode
-  function simulateSuccessfulScan() {
-    closeScanner();
-    const mockBarcode = "EXT-" + Math.floor(1000 + Math.random() * 9000); // e.g., EXT-4921
-
+  // Triggered automatically when camera successfully reads a barcode/QR
+  function onScanSuccess(decodedText) {
+    closeScanner(); // Close camera instantly
+    
     if (activeScannerMode === 'input') {
-      document.getElementById('bookingID').value = mockBarcode;
+      document.getElementById('bookingID').value = decodedText;
       showAlert('success', 'Barcode scanned successfully.');
     } else if (activeScannerMode === 'fetch') {
-      triggerApiFetch(mockBarcode);
+      triggerApiFetch(decodedText);
     }
   }
 
+  // --- SCAN & FETCH SIMULATION LOGIC ---
   function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
     document.getElementById('scanLoadingState').classList.remove('d-none');
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
-    // Simulate Network/API call delay
+    // Simulate Network/API delay for data fetch
     setTimeout(() => {
       document.getElementById('scanLoadingState').classList.add('d-none');
       
@@ -424,7 +456,7 @@
     document.getElementById('submitFetchedBtn').innerHTML = '<i class="bi bi-check-circle"></i> Confirm & Save';
   }
 
-  // --- BULK UPLOAD LOGIC ---
+  // --- BULK UPLOAD ---
   function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
