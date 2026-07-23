@@ -265,7 +265,6 @@
   const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
 
   var sessionUser = JSON.parse(localStorage.getItem('afc_user'));
-  var activeDeliveryPkg = null;
 
   function initMobileDashboard() {
     if(!sessionUser) {
@@ -275,8 +274,11 @@
     
     document.getElementById('mobBranch').innerText = sessionUser.branch;
     
-    var isAdmin = (sessionUser.role === 'Admin' || sessionUser.role === 'Head Office' || sessionUser.role === 'Super Admin');
-    if(isAdmin) document.getElementById('mobNavAdmin').classList.remove('d-none');
+    var isAdmin = (sessionUser.role === 'Admin' || sessionUser.role === 'Head Office' || sessionUser.role === 'Super Admin' || sessionUser.role === 'Branch Manager');
+    if(isAdmin) {
+      var adminNav = document.getElementById('mobNavAdmin');
+      if (adminNav) adminNav.classList.remove('d-none');
+    }
 
     var hour = new Date().getHours();
     var greeting = "Good Evening";
@@ -299,6 +301,8 @@
   function setupPullToRefresh() {
     const scrollArea = document.getElementById('mainScrollArea');
     const ptrContainer = document.getElementById('ptrContainer');
+    if (!scrollArea || !ptrContainer) return;
+    
     let startY = 0;
     let isPulling = false;
 
