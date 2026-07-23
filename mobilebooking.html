@@ -427,7 +427,6 @@
 
         // Map Alfarha API fields to our local schema
         tempFetchedData = {
-          // Force strip spaces from the ID before it gets saved into our local DB
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
           shipper: extData.agent_name || "",
           shipperPhone: extData.agent_mobile || "",
@@ -461,14 +460,22 @@
       } else {
         document.getElementById('scanLoadingState').classList.add('d-none');
         document.getElementById('scanHeroState').classList.remove('d-none');
-        const errMsg = res.apiData ? res.apiData.message : "Failed to retrieve order data.";
-        showAlert('danger', "External API: " + errMsg);
+        
+        // REVEAL THE TRUE ERROR
+        let errMsg = "Failed to retrieve order data.";
+        if (res.apiData && res.apiData.message) {
+          errMsg = res.apiData.message; // Captures actual API error like "Unauthorized"
+        } else if (res.message) {
+          errMsg = res.message; // Captures Apps Script errors like "Action not found"
+        }
+        
+        showAlert('danger', "Error: " + errMsg);
       }
 
     } catch (error) {
       document.getElementById('scanLoadingState').classList.add('d-none');
       document.getElementById('scanHeroState').classList.remove('d-none');
-      showAlert('danger', "Network error connecting to master database.");
+      showAlert('danger', "Network error connecting to backend.");
     }
   }
 
