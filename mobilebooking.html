@@ -36,12 +36,10 @@
     .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-height) + 20px); -webkit-overflow-scrolling: touch; }
     .main-scroll-area::-webkit-scrollbar { display: none; }
 
-    /* Header */
+    /* Header & Tabs */
     .page-header { margin-bottom: 20px; animation: slideDown 0.5s ease-out; }
     .page-title { font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; margin: 0 0 4px 0; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
     .page-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
-
-    /* Tabs */
     .tabs-wrapper { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; margin-bottom: 20px; margin-left: -16px; margin-right: -16px; padding: 0 16px; }
     .tabs-wrapper::-webkit-scrollbar { display: none; }
     .admin-tabs { display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 14px; gap: 4px; }
@@ -74,41 +72,45 @@
     .btn-secondary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: #f1f5f9; color: #475569; border: none; padding: 16px; border-radius: 14px; width: 100%; margin-top: 12px; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
     .btn-secondary-custom:hover { background: #e2e8f0; }
 
-    /* Scan & Fetch UI */
-    .scan-hero { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 40px 20px; text-align: center; color: white; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    .scan-hero i { font-size: 3.5rem; color: #38bdf8; margin-bottom: 16px; display: inline-block; animation: float 3s ease-in-out infinite; }
-    .scan-hero h3 { font-family: 'Lexend', sans-serif; font-size: 1.2rem; margin: 0 0 8px 0; }
-    .scan-hero p { font-size: 0.85rem; opacity: 0.8; margin: 0 0 20px 0; }
-    .btn-trigger-scan { background: #38bdf8; color: #0f172a; border: none; padding: 14px 24px; border-radius: 12px; font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    /* =======================================
+       NEW SCAN & FETCH REDESIGN 
+       ======================================= */
     
-    /* --- BOTTOM SHEETS MODAL --- */
-    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end; }
-    .bottom-sheet-overlay.active { opacity: 1; pointer-events: all; }
-    .bottom-sheet { background: var(--bg-color); width: 100%; max-height: 90vh; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
-    .bottom-sheet-overlay.active .bottom-sheet { transform: translateY(0); }
-    .bs-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border-radius: 24px 24px 0 0; flex-shrink: 0; }
-    .bs-title { font-family: 'Lexend', sans-serif; font-size: 1.2rem; font-weight: 600; margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-    .bs-close { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;}
-    .bs-content { overflow-y: auto; padding: 20px; flex: 1; -webkit-overflow-scrolling: touch; }
+    .scanner-frame { background: #0f172a; border-radius: 24px; padding: 40px 20px; text-align: center; color: white; overflow: hidden; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-bottom: 20px; }
+    .scanner-frame::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.15), transparent 70%); pointer-events: none; }
+    
+    .scanner-viewfinder { width: 140px; height: 140px; margin: 0 auto 24px; position: relative; border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(0,0,0,0.2); }
+    .scanner-viewfinder i { font-size: 3.5rem; color: #38bdf8; opacity: 0.5; }
+    .scanner-laser { position: absolute; left: 0; width: 100%; height: 2px; background: #38bdf8; box-shadow: 0 0 15px #38bdf8, 0 0 30px #38bdf8; animation: scanLaser 2s infinite linear; }
+    
+    .scanner-title { font-family: 'Lexend', sans-serif; font-size: 1.25rem; font-weight: 600; margin: 0 0 8px 0; color: #ffffff; }
+    .scanner-desc { font-size: 0.85rem; color: #94a3b8; margin: 0 0 24px 0; padding: 0 20px; line-height: 1.5; }
+    
+    .btn-trigger-scan { background: #38bdf8; color: #0f172a; border: none; padding: 16px 24px; border-radius: 14px; font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 1rem; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; width: 100%; justify-content: center; transition: transform 0.2s; }
+    .btn-trigger-scan:active { transform: scale(0.98); }
 
-    /* Premium Ticket Preview Card */
-    .ticket-preview { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 20px; padding: 20px; border: 1px solid #cbd5e0; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
-    .ticket-bg-icon { position: absolute; top: -20px; right: -20px; font-size: 8rem; color: rgba(255,255,255,0.6); pointer-events: none; }
-    .tp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; position: relative; z-index: 2; }
-    .tp-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-    .tp-id { font-family: 'Lexend', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--brand-accent); }
-    .tp-badge { background: #10b981; color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; box-shadow: 0 4px 10px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 4px; }
+    /* Smart Waybill Inline Card */
+    .waybill-card { background: #ffffff; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 12px 30px rgba(0,0,0,0.06); overflow: hidden; animation: slideUp 0.4s ease-out; margin-bottom: 20px; }
+    .wb-header { background: #f8fafc; padding: 20px; border-bottom: 2px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .wb-status { display: flex; align-items: center; gap: 6px; background: #ecfdf5; color: #059669; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; font-family: 'Lexend', sans-serif; }
     
-    .tp-route-box { background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #ffffff; position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .tp-route-label { font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 2px;}
-    .tp-route-value { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.95rem; color: #0f172a; line-height: 1.2; word-wrap: break-word; }
+    .wb-body { padding: 20px; }
+    .wb-id-group { text-align: center; margin-bottom: 24px; }
+    .wb-id-lbl { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .wb-id-val { font-family: 'Lexend', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
     
-    .tp-details { display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2; }
-    .tp-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e0; padding-bottom: 8px; }
-    .tp-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .tp-row-label { color: #475569; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-    .tp-row-val { color: #0f172a; font-size: 0.9rem; font-weight: 700; text-align: right; max-width: 60%; word-wrap: break-word; }
-
+    .wb-route { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 16px; border-radius: 16px; margin-bottom: 24px; }
+    .wb-point { width: 40%; }
+    .wb-city { font-family: 'Lexend', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+    .wb-country { font-size: 0.75rem; color: #64748b; font-weight: 600; }
+    .wb-divider { color: #cbd5e0; font-size: 1.2rem; display: flex; flex-direction: column; align-items: center; }
+    
+    .wb-details-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .wb-data-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+    .wb-data-row:last-child { border-bottom: none; }
+    .wb-d-lbl { color: #64748b; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .wb-d-val { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--text-main); text-align: right; max-width: 60%; word-wrap: break-word; }
+    
     /* Alerts */
     .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
     .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
@@ -116,7 +118,7 @@
 
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    @keyframes scanLaser { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 150px; opacity: 0; } }
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
@@ -188,23 +190,82 @@
     </div>
 
     <!-- ============================================== -->
-    <!-- TAB 2: SCAN & FETCH                            -->
+    <!-- TAB 2: SCAN & FETCH REDESIGN                   -->
     <!-- ============================================== -->
-    <div id="tab-fetch" class="content-card">
+    <div id="tab-fetch" class="content-card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
       
-      <div id="scanHeroState" class="scan-hero">
-        <i class="bi bi-upc-scan"></i>
-        <h3>Smart Scan & Add</h3>
-        <p>Scan a live barcode to pull details directly from the master software.</p>
-        <button type="button" class="btn-trigger-scan" onclick="triggerBookingScan('fetch')"><i class="bi bi-camera"></i> Tap to Scan Barcode</button>
+      <!-- Scan Hero State -->
+      <div id="scanHeroState" class="scanner-frame">
+        <div class="scanner-viewfinder">
+          <i class="bi bi-upc"></i>
+          <div class="scanner-laser"></div>
+        </div>
+        <h3 class="scanner-title">Smart Waybill Scanner</h3>
+        <p class="scanner-desc">Point your camera at a live tracking barcode to pull details instantly from the master database.</p>
+        <button type="button" class="btn-trigger-scan" onclick="triggerBookingScan('fetch')"><i class="bi bi-camera"></i> Launch Camera</button>
       </div>
 
-      <div id="scanLoadingState" class="d-none" style="text-align: center; padding: 40px 20px;">
-        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 2.5rem; color: var(--brand-accent); margin-bottom: 16px;"></i>
-        <h4 style="font-family: 'Lexend'; color: var(--text-main);">Fetching Details...</h4>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">Searching for <span id="fetchingIdTxt" style="font-weight:bold;"></span></p>
+      <!-- Loading State -->
+      <div id="scanLoadingState" class="scanner-frame d-none" style="padding: 60px 20px;">
+        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 3rem; color: #38bdf8; margin-bottom: 20px;"></i>
+        <h3 class="scanner-title">Locating Record...</h3>
+        <p class="scanner-desc">Verifying API response for <span id="fetchingIdTxt" style="font-weight:700; color:white;"></span></p>
       </div>
 
+      <!-- Verified Inline Waybill -->
+      <div id="scanResultState" class="d-none">
+        
+        <div class="waybill-card">
+          <div class="wb-header">
+            <span style="font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--text-main);"><i class="bi bi-shield-check" style="color: var(--brand-accent);"></i> Verified API</span>
+            <div class="wb-status"><i class="bi bi-check-circle-fill"></i> Ready</div>
+          </div>
+          
+          <div class="wb-body">
+            <div class="wb-id-group">
+              <div class="wb-id-lbl">Booking Reference</div>
+              <div class="wb-id-val" id="fpId">---</div>
+            </div>
+
+            <div class="wb-route">
+              <div class="wb-point">
+                <div class="wb-city" id="fpOriginCity">---</div>
+                <div class="wb-country" id="fpOriginCountry">---</div>
+              </div>
+              <div class="wb-divider"><i class="bi bi-airplane-fill" style="transform: rotate(45deg);"></i></div>
+              <div class="wb-point" style="text-align: right;">
+                <div class="wb-city" id="fpDestCity">---</div>
+                <div class="wb-country" id="fpDestCountry">---</div>
+              </div>
+            </div>
+
+            <div class="wb-details-grid">
+              <div class="wb-data-row">
+                <div class="wb-d-lbl"><i class="bi bi-person-up"></i> Shipper</div>
+                <div class="wb-d-val" id="fpShipper">---</div>
+              </div>
+              <div class="wb-data-row">
+                <div class="wb-d-lbl"><i class="bi bi-person-down"></i> Consignee</div>
+                <div class="wb-d-val" id="fpConsignee">---</div>
+              </div>
+              <div class="wb-data-row">
+                <div class="wb-d-lbl"><i class="bi bi-box-seam"></i> Cargo Specs</div>
+                <div class="wb-d-val" id="fpWeight">---</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="margin: 0;" onclick="submitFetchedBooking()"><i class="bi bi-cloud-arrow-up-fill"></i> Save to Internal System</button>
+          
+          <div style="display: flex; gap: 12px;">
+            <button type="button" class="btn-secondary-custom" style="flex: 1; margin: 0; background: var(--card-bg); border: 1px solid var(--border-color);" onclick="editFetchedData()"><i class="bi bi-pencil-square"></i> Modify Details</button>
+            <button type="button" class="btn-secondary-custom" style="flex: 1; margin: 0; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca;" onclick="resetFetchState()"><i class="bi bi-trash"></i> Discard</button>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- ============================================== -->
@@ -222,67 +283,8 @@
   </div>
 </div>
 
-<!-- ============================================== -->
-<!-- POPUP MODAL: FETCHED TICKET                    -->
-<!-- ============================================== -->
-<div class="bottom-sheet-overlay" id="fetchedTicketModal" onclick="closeTicketModal(event)">
-  <div class="bottom-sheet" style="max-height: 90vh;">
-    <div class="bs-header">
-      <h3 class="bs-title"><i class="bi bi-card-heading" style="color: var(--brand-accent);"></i> Digital Ticket</h3>
-      <button class="bs-close" onclick="closeTicketModal('force')"><i class="bi bi-x"></i></button>
-    </div>
-    <div class="bs-content">
-      
-      <div class="ticket-preview">
-        <div class="ticket-bg-icon"><i class="bi bi-box-seam"></i></div>
-        
-        <div class="tp-header">
-          <div>
-            <div class="tp-label">Booking ID</div>
-            <div class="tp-id" id="fpId">---</div>
-          </div>
-          <span class="tp-badge"><i class="bi bi-check2-all"></i> Verified</span>
-        </div>
-
-        <div class="tp-route-box">
-          <div>
-            <div class="tp-route-label">Origin</div>
-            <div class="tp-route-value" id="fpOrigin">---</div>
-          </div>
-          <div>
-            <div class="tp-route-label">Destination</div>
-            <div class="tp-route-value" id="fpDest">---</div>
-          </div>
-        </div>
-
-        <div class="tp-details">
-          <div class="tp-row">
-            <span class="tp-row-label"><i class="bi bi-person-up"></i> Sender</span>
-            <span class="tp-row-val" id="fpShipper">---</span>
-          </div>
-          <div class="tp-row">
-            <span class="tp-row-label"><i class="bi bi-person-down"></i> Consignee</span>
-            <span class="tp-row-val" id="fpConsignee">---</span>
-          </div>
-          <div class="tp-row">
-            <span class="tp-row-label"><i class="bi bi-boxes"></i> Load</span>
-            <span class="tp-row-val" id="fpWeight">---</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-top: 16px;">
-        <button type="button" id="submitFetchedBtn" class="btn-primary-custom" style="flex: 2; margin-top: 0;" onclick="submitFetchedBooking()"><i class="bi bi-cloud-arrow-up-fill"></i> Save to System</button>
-        <button type="button" class="btn-secondary-custom" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e0;" onclick="editFetchedData()"><i class="bi bi-pencil-square"></i> Edit</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 <!-- INJECT MODULAR SCRIPTS HERE -->
 <script src="/scanner.js"></script>
-<script src="/externalApi.js"></script> <!-- NEW SCRIPT -->
 <script src="/nav.js"></script>
 
 <script>
@@ -315,21 +317,10 @@
     setTimeout(() => alertBox.style.display = 'none', 5000);
   }
 
-  // Handle Modal Closing
-  function closeTicketModal(e) {
-    if (e === 'force' || (e && e.target.id === 'fetchedTicketModal')) {
-      document.getElementById('fetchedTicketModal').classList.remove('active');
-      // Reset background state
-      document.getElementById('scanLoadingState').classList.add('d-none');
-      document.getElementById('scanHeroState').classList.remove('d-none');
-    }
-  }
-
   // --- CONNECTION TO SCANNER.JS ---
   function triggerBookingScan(mode) {
     openScanner(mode, function(decodedText, returnedMode) {
       if (returnedMode === 'input') {
-        // Strip space for manual field entry
         const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById('bookingID');
         inputField.value = trimmedCode;
@@ -337,7 +328,6 @@
         showAlert('success', 'Barcode scanned successfully.');
       } 
       else if (returnedMode === 'fetch') {
-        // Pass the RAW barcode (with spaces) so the API finds it
         triggerApiFetch(decodedText);
       }
     });
@@ -402,22 +392,31 @@
     });
   }
 
-  // --- LIVE SCAN & FETCH EXTERNAL API (DIRECT BROWSER FETCH) ---
+  // --- LIVE SCAN & FETCH EXTERNAL API ---
   async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
     document.getElementById('scanLoadingState').classList.remove('d-none');
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
-      // Call the function from externalApi.js directly
-      const res = await fetchDirectFromAlfarha(scannedId);
+      const response = await fetch(GOOGLE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
+        body: JSON.stringify({
+          action: "fetchExternalOrder",
+          orderNo: scannedId 
+        })
+      });
+
+      const res = await response.json();
       
       // Verify the external API returned success
       if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data && res.apiData.data.length > 0) {
         
         const extData = res.apiData.data[0];
 
-        // Map Alfarha API fields to our local schema
+        // Map Alfarha API fields to our local schema using the updated data keys
         tempFetchedData = {
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
@@ -432,22 +431,22 @@
           pcs: extData.total_box || "1"
         };
 
-        // Populate the Premium Ticket UI
+        // Populate the Inline Smart Waybill UI
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
-        document.getElementById('fpOrigin').innerText = tempFetchedData.originCity;
         
-        let destinationFull = tempFetchedData.destCity;
-        if(tempFetchedData.destCountry) destinationFull += ", " + tempFetchedData.destCountry;
-        document.getElementById('fpDest').innerText = destinationFull || "N/A";
+        document.getElementById('fpOriginCity').innerText = tempFetchedData.originCity;
+        document.getElementById('fpOriginCountry').innerText = tempFetchedData.originCountry;
+        
+        document.getElementById('fpDestCity').innerText = tempFetchedData.destCity || "N/A";
+        document.getElementById('fpDestCountry').innerText = tempFetchedData.destCountry || "N/A";
         
         document.getElementById('fpShipper').innerText = tempFetchedData.shipper || "N/A";
         document.getElementById('fpConsignee').innerText = tempFetchedData.consignee || "N/A";
         document.getElementById('fpWeight').innerText = `${tempFetchedData.weight} KG / ${tempFetchedData.pcs} PCS`;
         
-        // Hide Loader and Trigger Modal
+        // Hide Loader and Reveal Inline Card
         document.getElementById('scanLoadingState').classList.add('d-none');
-        document.getElementById('scanHeroState').classList.remove('d-none');
-        document.getElementById('fetchedTicketModal').classList.add('active');
+        document.getElementById('scanResultState').classList.remove('d-none');
 
       } else {
         document.getElementById('scanLoadingState').classList.add('d-none');
@@ -466,7 +465,7 @@
     } catch (error) {
       document.getElementById('scanLoadingState').classList.add('d-none');
       document.getElementById('scanHeroState').classList.remove('d-none');
-      showAlert('danger', "Critical error executing local fetch.");
+      showAlert('danger', "Network error connecting to backend.");
     }
   }
 
@@ -485,9 +484,9 @@
     document.getElementById('weight').value = tempFetchedData.weight || '';
     document.getElementById('pcs').value = tempFetchedData.pcs || '';
 
-    closeTicketModal('force');
+    resetFetchState();
     switchTab('single', document.getElementById('tabBtnSingle'));
-    showAlert('success', 'Data loaded successfully. You can now edit the details.');
+    showAlert('success', 'Data transferred successfully. You can now edit the details.');
   }
 
   async function submitFetchedBooking() {
@@ -513,20 +512,26 @@
       const res = await response.json();
       
       if(res.success) {
-        closeTicketModal('force');
-        showAlert('success', "Digital Ticket Saved Successfully!");
+        resetFetchState();
+        showAlert('success', "Waybill Saved Successfully to Internal System!");
       } else {
         showAlert('danger', res.message || "Failed to save.");
       }
       
       btn.disabled = false; 
-      btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
+      btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to Internal System';
       
     } catch (error) {
       showAlert('danger', 'Network connection error.');
       btn.disabled = false; 
-      btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to System';
+      btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Save to Internal System';
     }
+  }
+
+  function resetFetchState() {
+    tempFetchedData = null;
+    document.getElementById('scanResultState').classList.add('d-none');
+    document.getElementById('scanHeroState').classList.remove('d-none');
   }
 
   // --- BULK UPLOAD ---
