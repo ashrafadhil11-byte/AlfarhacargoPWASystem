@@ -155,6 +155,17 @@
         </div>
       </div>
       
+      <!-- ADDED: Package Type Dropdown -->
+      <div class="input-group">
+        <label class="input-label">Package Type</label>
+        <select id="packageType" class="minimal-input">
+          <option value="Parcel" selected>Parcel</option>
+          <option value="Document">Document</option>
+          <option value="Air Cargo">Air Cargo</option>
+          <option value="Sea Freight">Sea Freight</option>
+        </select>
+      </div>
+      
       <div style="display: flex; gap: 12px;">
         <div class="input-group" style="flex: 1;">
           <label class="input-label">Weight (KG)</label>
@@ -362,7 +373,7 @@
       originCountry: document.getElementById('originCountry').value.trim(),
       destCity: document.getElementById('destCity').value.trim(), 
       destCountry: document.getElementById('destCountry').value.trim(),
-      packageType: 'Parcel', 
+      packageType: document.getElementById('packageType').value,
       weight: document.getElementById('weight').value, 
       pcs: document.getElementById('pcs').value
     };
@@ -404,6 +415,8 @@
     ['bookingID', 'shipper', 'shipperPhone', 'consignee', 'originCity', 'originCountry', 'destCity', 'destCountry', 'weight', 'pcs'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    // Reset dropdown to default
+    document.getElementById('packageType').value = 'Parcel';
   }
 
   // --- LIVE SCAN & FETCH EXTERNAL API ---
@@ -482,6 +495,7 @@
     if (!tempFetchedData) return;
     
     document.getElementById('bookingID').value = tempFetchedData.bookingID || '';
+    document.getElementById('packageType').value = tempFetchedData.packageType || 'Parcel';
     document.getElementById('shipper').value = tempFetchedData.shipper || '';
     document.getElementById('shipperPhone').value = tempFetchedData.shipperPhone || '';
     document.getElementById('consignee').value = tempFetchedData.consignee || '';
