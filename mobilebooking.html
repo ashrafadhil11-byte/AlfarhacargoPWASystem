@@ -421,23 +421,24 @@
       const res = await response.json();
       
       // Verify the external API returned success
-      if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data.length > 0) {
+      if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data && res.apiData.data.length > 0) {
         
         const extData = res.apiData.data[0];
 
-        // Map Alfarha API fields to our local schema
+        // Map Alfarha API fields to our local schema using the updated data keys
         tempFetchedData = {
+          // Force strip spaces from the ID before it gets saved into our local DB
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
-          shipper: extData.agent_name || "",
-          shipperPhone: extData.agent_mobile || "",
-          consignee: extData.receiver_name || "",
+          shipper: extData.sender_name || "",
+          shipperPhone: extData["sender phone"] || "",
+          consignee: extData["receiver name"] || "",
           originCity: extData.booking_branch || sessionUser.branch, 
-          originCountry: "Oman", 
+          originCountry: extData.order_from || "Oman", 
           destCity: extData.receiver_district || "",
           destCountry: extData.receiver_country || "",
           packageType: extData.cargotype || "Parcel",
           weight: extData.total_weight || "0",
-          pcs: extData["total box"] || "1"
+          pcs: extData.total_box || "1"
         };
 
         // Populate the Premium Ticket UI
@@ -461,12 +462,11 @@
         document.getElementById('scanLoadingState').classList.add('d-none');
         document.getElementById('scanHeroState').classList.remove('d-none');
         
-        // REVEAL THE TRUE ERROR
         let errMsg = "Failed to retrieve order data.";
         if (res.apiData && res.apiData.message) {
-          errMsg = res.apiData.message; // Captures actual API error like "Unauthorized"
+          errMsg = res.apiData.message;
         } else if (res.message) {
-          errMsg = res.message; // Captures Apps Script errors like "Action not found"
+          errMsg = res.message;
         }
         
         showAlert('danger', "Error: " + errMsg);
