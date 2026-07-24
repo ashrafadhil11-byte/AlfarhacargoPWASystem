@@ -282,6 +282,7 @@
 
 <!-- INJECT MODULAR SCRIPTS HERE -->
 <script src="/scanner.js"></script>
+<script src="/externalApi.js"></script> <!-- NEW SCRIPT -->
 <script src="/nav.js"></script>
 
 <script>
@@ -401,33 +402,23 @@
     });
   }
 
-  // --- LIVE SCAN & FETCH EXTERNAL API ---
+  // --- LIVE SCAN & FETCH EXTERNAL API (DIRECT BROWSER FETCH) ---
   async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
     document.getElementById('scanLoadingState').classList.remove('d-none');
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
-      const response = await fetch(GOOGLE_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: "fetchExternalOrder",
-          orderNo: scannedId 
-        })
-      });
-
-      const res = await response.json();
+      // Call the function from externalApi.js directly
+      const res = await fetchDirectFromAlfarha(scannedId);
       
       // Verify the external API returned success
       if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data && res.apiData.data.length > 0) {
         
         const extData = res.apiData.data[0];
 
-        // Map Alfarha API fields to our local schema using the updated data keys
+        // Map Alfarha API fields to our local schema
         tempFetchedData = {
-          // Force strip spaces from the ID before it gets saved into our local DB
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
           shipperPhone: extData["sender phone"] || "",
@@ -475,7 +466,7 @@
     } catch (error) {
       document.getElementById('scanLoadingState').classList.add('d-none');
       document.getElementById('scanHeroState').classList.remove('d-none');
-      showAlert('danger', "Network error connecting to backend.");
+      showAlert('danger', "Critical error executing local fetch.");
     }
   }
 
