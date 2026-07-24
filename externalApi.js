@@ -1,12 +1,14 @@
-// externalApi.js - Direct Frontend API Connection
+// externalApi.js - Proxy-Assisted Frontend API Connection
 
 async function fetchDirectFromAlfarha(scannedId) {
-  // Clean the barcode and format the URL
   const orderNo = encodeURIComponent(scannedId.trim());
-  const url = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
+  const targetUrl = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
+  
+  // Wrap the target URL in a CORS proxy to bypass browser restrictions
+  const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
   
   try {
-    const response = await fetch(url, {
+    const response = await fetch(proxyUrl, {
       method: 'POST',
       headers: {
         'X-API-KEY': 'R681hJQUTSXBqf6QHxLasBln2x0',
@@ -14,7 +16,6 @@ async function fetchDirectFromAlfarha(scannedId) {
       }
     });
 
-    // Check if the server responds properly
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
@@ -23,7 +24,6 @@ async function fetchDirectFromAlfarha(scannedId) {
     return { success: true, apiData: data };
 
   } catch (error) {
-    // If this fails, it is almost certainly a CORS block
-    return { success: false, message: "Browser blocked the request (CORS Error) or Network failure." };
+    return { success: false, message: "Proxy blocked by Cloudflare or Network failure." };
   }
 }
