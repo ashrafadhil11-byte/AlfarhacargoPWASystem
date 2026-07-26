@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- PWA Meta Tags -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#fafafa">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.json"> <!-- Ensure your manifest is linked -->
+  
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <!-- External Scanner Library (Ensure this matches your setup) -->
+  <script src="scanner.js"></script>
+
+  <style>
+    :root { --bg-color: #fafafa; --card-bg: #ffffff; --border-color: #eaeaea; --text-main: #111827; --text-muted: #6b7280; --brand-accent: #6f42c1; --sidebar-width: 260px; }
+    
+    * { box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; overscroll-behavior-y: none; }
+    
+    .app-layout { display: flex; min-height: 100vh; font-family: 'Comfortaa', cursive; color: var(--text-main); background-color: var(--bg-color); }
+    
+    /* Sidebar / Bottom Nav (Mobile Responsive) */
+    .sidebar { width: var(--sidebar-width); background-color: var(--card-bg); border-right: 1px solid var(--border-color); position: fixed; height: 100vh; padding: 32px 20px; display: flex; flex-direction: column; z-index: 100; transition: all 0.3s ease; }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; padding: 0 5px; }
+    .sidebar-brand { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1.25rem; display: flex; align-items: center; gap: 12px; }
+    .sidebar-brand i { color: var(--brand-accent); font-size: 1.5rem; }
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-item { font-family: 'Lexend', sans-serif; font-size: 0.95rem; font-weight: 500; padding: 14px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; color: var(--text-muted); transition: all 0.2s ease; }
+    .nav-item i { font-size: 1.2rem; min-width: 30px; }
+    .nav-item:hover { color: var(--brand-accent); background-color: #faf5ff; }
+    .nav-item.active { color: var(--brand-accent); background-color: #f3e8ff; }
+    .sidebar-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--border-color); }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-weight: 600; font-size: 0.9rem; }
+    .user-branch { font-size: 0.75rem; color: var(--text-muted); }
+    
+    /* Main Content */
+    .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 48px 5%; width: calc(100% - var(--sidebar-width)); padding-bottom: 100px; }
+    .page-header { margin-bottom: 30px; }
+    .page-title { font-family: 'Lexend', sans-serif; font-weight: 300; font-size: 2rem; letter-spacing: -0.03em; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    .page-subtitle { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+    
+    /* Split Layout */
+    .split-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+    @media (min-width: 1100px) { .split-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+    /* Form Card & Tabs */
+    .content-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); }
+    .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;}
+    .tab-btn { background: none; border: none; font-family: 'Lexend', sans-serif; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
+    .tab-btn:hover { color: var(--text-main); background: #f3f4f6; }
+    .tab-btn.active { color: var(--brand-accent); background: #f3e8ff; }
+    .tab-content { display: none; animation: fadeIn 0.4s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Input & Scanner Group */
+    .input-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+    .input-label { font-family: 'Lexend', sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .input-with-scanner { display: flex; gap: 8px; }
+    .minimal-input { flex: 1; border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); background-color: #f8fafc; font-family: 'Comfortaa', cursive; font-weight: 600; color: var(--text-main); width: 100%; font-size: 0.95rem; transition: all 0.2s ease; }
+    .minimal-input:focus { outline: none; border-color: var(--brand-accent); background-color: #ffffff; }
+    textarea.minimal-input { min-height: 100px; resize: vertical; line-height: 1.5; }
+    select.minimal-input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
+
+    .optional-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 600px) { .optional-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* Collapsible Carrier UI */
+    .carrier-toggle-btn { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px dashed #cbd5e0; padding: 16px; border-radius: 12px; cursor: pointer; color: var(--text-main); font-family: 'Lexend', sans-serif; font-size: 0.95rem; font-weight: 500; transition: all 0.2s ease; margin: 24px 0; }
+    .carrier-toggle-btn:hover { background: #f1f5f9; border-color: var(--brand-accent); color: var(--brand-accent); }
+    .carrier-section { display: none; animation: fadeIn 0.3s ease; border: 1px solid var(--border-color); padding: 20px 20px 0 20px; border-radius: 12px; background: #fafafa; margin-bottom: 24px; }
+    .carrier-section.expanded { display: block; }
+
+    /* Buttons */
+    .btn-icon { background-color: var(--brand-accent); color: white; border: none; border-radius: 12px; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: all 0.2s ease; }
+    .btn-icon:hover { background-color: #5a32a3; }
+    
+    .btn-primary-custom, .btn-success-custom { font-family: 'Lexend', sans-serif; font-weight: 500; color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-size: 1rem; margin-top: 10px; }
+    .btn-primary-custom { background-color: var(--brand-accent); }
+    .btn-primary-custom:hover { background-color: #5a32a3; transform: translateY(-2px); }
+    .btn-success-custom { background-color: #10b981; margin-top: 16px; }
+    .btn-success-custom:hover { background-color: #059669; transform: translateY(-2px); }
+    
+    .btn-cancel-custom { font-family: 'Lexend', sans-serif; font-weight: 500; background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; }
+    
+    .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 16px; margin-bottom: 24px; }
+    .divider { height: 1px; background-color: var(--border-color); margin: 24px 0; }
+    .section-title { font-family: 'Lexend', sans-serif; font-weight: 500; font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;}
+
+    /* Modals (API & Scanner) */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .details-modal { background: var(--card-bg); border-radius: 24px; padding: 24px; max-width: 650px; width: 95%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid var(--border-color); transform: translateY(40px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .modal-overlay.active .details-modal { transform: translateY(0); }
+    
+    /* Scanner Video Container */
+    #scanner-container { width: 100%; max-height: 60vh; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; }
+    #scanner-container video { width: 100%; height: auto; object-fit: cover; }
+    .scan-guide { position: absolute; border: 2px solid #10b981; width: 70%; height: 100px; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 100vmax rgba(0,0,0,0.5); pointer-events: none; }
+
+    /* Mobile PWA Overrides */
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; height: auto; position: fixed; bottom: 0; left: 0; flex-direction: row; padding: 12px 8px; border-right: none; border-top: 1px solid var(--border-color); z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+      .sidebar-header, .sidebar-footer { display: none; }
+      .nav-menu { flex-direction: row; justify-content: space-around; width: 100%; gap: 0; }
+      .nav-item { flex-direction: column; padding: 8px; border-radius: 8px; font-size: 0.7rem; gap: 4px; }
+      .nav-item i { min-width: auto; font-size: 1.4rem; }
+      .nav-text { display: block; text-align: center; }
+      
+      .main-content { margin-left: 0; width: 100%; padding: 24px 16px 100px 16px; }
+      .page-title { font-size: 1.6rem; }
+      .content-card { padding: 16px; }
+      .admin-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+      .admin-tabs::-webkit-scrollbar { display: none; }
+      .tab-btn { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- API Diagnostic Modal -->
+<div class="modal-overlay" id="syncModal">
+  <div class="details-modal">
+    <div class="section-title"><i class="bi bi-terminal text-primary"></i> API Diagnostic Report</div>
+    <div id="syncModalText" style="margin-bottom: 16px; font-family: 'Lexend'; font-size: 0.95rem; color: var(--text-muted);">Syncing complete.</div>
+    <button class="btn-primary-custom" onclick="closeSyncModal()">Close Report</button>
+  </div>
+</div>
+
+<!-- Scanner Modal -->
+<div class="modal-overlay" id="scannerModal">
+  <div class="details-modal" style="padding: 16px;">
+    <div class="section-title"><i class="bi bi-upc-scan text-primary"></i> Scan Barcode</div>
+    <div id="scanner-container">
+      <video id="camera-stream" playsinline autoplay></video>
+      <div class="scan-guide"></div>
+    </div>
+    <button class="btn-cancel-custom" onclick="stopScanner()">Cancel Scan</button>
+  </div>
+</div>
+
+<div class="app-layout">
+  
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header"><div class="sidebar-brand"><i class="bi bi-box-seam-fill"></i> <span class="brand-text">Al-Farha</span></div></div>
+    <nav class="nav-menu">
+      <div class="nav-item" onclick="returnToDashboard()"><i class="bi bi-grid"></i> <span class="nav-text">Dash</span></div>
+      <div class="nav-item" onclick="loadBookingForm()"><i class="bi bi-plus-circle"></i> <span class="nav-text">New</span></div>
+      <div class="nav-item" onclick="loadTransfers()"><i class="bi bi-arrow-left-right"></i> <span class="nav-text">Inventory</span></div>
+      <div class="nav-item active"><i class="bi bi-geo-alt-fill"></i> <span class="nav-text">Update</span></div>
+      <div class="nav-item" onclick="loadConsolidation()"><i class="bi bi-layers"></i> <span class="nav-text">Consol</span></div>
+      <div class="nav-item d-none" id="nav-admin" onclick="loadAdminPanel()"><i class="bi bi-shield-lock"></i> <span class="nav-text">Admin</span></div>
+    </nav>
+    <div class="sidebar-footer"><div class="user-details"><span class="user-name" id="navName">Loading...</span><span class="user-branch" id="navBranch">Branch</span></div></div>
+  </aside>
+
+  <main class="main-content" id="mainContent">
+    
+    <div class="page-header">
+      <h1 class="page-title"><i class="bi bi-upc-scan text-primary"></i> Scan & Update</h1>
+      <p class="page-subtitle">Log milestones, backdate entries, and map 3rd-party tracking dockets directly from the field.</p>
+    </div>
+
+    <div class="split-grid">
+      
+      <div class="content-card">
+        <div id="update-alert" class="alert d-none custom-alert" role="alert"></div>
+
+        <div class="admin-tabs">
+          <button class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-box me-1"></i> Single</button>
+          <button class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-boxes me-1"></i> Bulk</button>
+          <button class="tab-btn" onclick="switchTab('consol', this)"><i class="bi bi-layers-half me-1"></i> Consolidation</button>
+        </div>
+
+        <!-- Single Update Tab -->
+        <div id="tab-single" class="tab-content active">
+          <div class="input-group">
+            <label class="input-label">Booking ID / AWB</label>
+            <div class="input-with-scanner">
+              <input type="text" id="scanSingleId" class="minimal-input" placeholder="Enter AWB..." autocomplete="off">
+              <button class="btn-icon" onclick="startScanner('scanSingleId')"><i class="bi bi-qr-code-scan"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bulk Update Tab -->
+        <div id="tab-bulk" class="tab-content">
+          <div class="input-group">
+            <label class="input-label">Multiple Booking IDs</label>
+            <div class="input-with-scanner">
+              <textarea id="scanBulkIds" class="minimal-input" placeholder="Scan sequentially or paste..." autocomplete="off"></textarea>
+              <button class="btn-icon" style="height: auto;" onclick="startScanner('scanBulkIds', true)"><i class="bi bi-qr-code-scan"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consolidation Update Tab -->
+        <div id="tab-consol" class="tab-content">
+          <div class="input-group">
+            <label class="input-label">Master Consolidation ID</label>
+            <div class="input-with-scanner">
+              <input type="text" id="scanConsolId" class="minimal-input" placeholder="Enter Master Bag..." autocomplete="off">
+              <button class="btn-icon" onclick="startScanner('scanConsolId')"><i class="bi bi-qr-code-scan"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shared Status Fields -->
+        <div id="sharedUpdateFields">
+          <div class="divider"></div>
+
+          <div class="input-group">
+            <label class="input-label">New Status Milestone <span style="color: #dc2626;">*</span></label>
+            <select id="scanStatus" class="minimal-input">
+              <option value="" disabled selected>Select Milestone...</option>
+              <option value="Picked Up">Picked Up</option>
+              <option value="In-Transit">In-Transit</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+
+          <div class="optional-grid">
+            <div class="input-group">
+              <label class="input-label">Location (Optional)</label>
+              <input type="text" id="scanLocation" class="minimal-input" placeholder="Leave blank for Branch">
+            </div>
+            <div class="input-group">
+              <label class="input-label">Backdate (Optional)</label>
+              <input type="datetime-local" id="scanDate" class="minimal-input">
+            </div>
+          </div>
+
+          <div id="carrierWrapper">
+            <div class="carrier-toggle-btn" onclick="toggleCarrierSection()">
+              <span><i class="bi bi-airplane-engines me-2"></i> Assign Carrier</span>
+              <i class="bi bi-chevron-down" id="carrierIcon"></i>
+            </div>
+            <div class="carrier-section" id="carrierSection">
+              <div class="optional-grid">
+                <div class="input-group">
+                  <label class="input-label">Forwarding Agent</label>
+                  <input type="text" id="fwdAgent" class="minimal-input">
+                </div>
+                <div class="input-group">
+                  <label class="input-label">Carrier Docket</label>
+                  <div class="input-with-scanner">
+                    <input type="text" id="fwdDocket" class="minimal-input">
+                    <button class="btn-icon" onclick="startScanner('fwdDocket')"><i class="bi bi-qr-code-scan"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="updateBtn" class="btn-primary-custom" onclick="submitStatusUpdate()">
+            <i class="bi bi-check2-circle"></i> Commit Record
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  var sessionUser = JSON.parse(localStorage.getItem('afc_user'));
+  var activeTab = 'single'; 
+  
+  // --- SCANNER INTEGRATION ---
+  let activeTargetInput = null;
+  let isContinuousScan = false;
+
+  // Hooks into your scanner.js configuration
+  function startScanner(targetInputId, continuous = false) {
+    activeTargetInput = targetInputId;
+    isContinuousScan = continuous;
+    document.getElementById('scannerModal').classList.add('active');
+    
+    // Trigger initialization function from scanner.js (e.g., Html5Qrcode or Quagga)
+    if (typeof initBarcodeScanner === 'function') {
+      initBarcodeScanner('camera-stream', handleScanResult);
+    } else {
+      console.warn("scanner.js not found or initBarcodeScanner is undefined.");
+    }
+  }
+
+  function handleScanResult(barcodeData) {
+    const inputField = document.getElementById(activeTargetInput);
+    
+    if (isContinuousScan) {
+      if (!inputField.value.includes(barcodeData)) {
+        inputField.value = inputField.value ? inputField.value + ",\n" + barcodeData : barcodeData;
+      }
+      // Keep scanner open for bulk
+    } else {
+      inputField.value = barcodeData;
+      stopScanner(); // Close automatically for single inputs
+    }
+    
+    // Play a beep sound for feedback
+    if(navigator.vibrate) navigator.vibrate(100);
+  }
+
+  function stopScanner() {
+    document.getElementById('scannerModal').classList.remove('active');
+    if (typeof stopBarcodeScanner === 'function') {
+      stopBarcodeScanner();
+    }
+  }
+
+  // --- UI TOGGLES ---
+  function toggleCarrierSection() {
+    const sec = document.getElementById('carrierSection');
+    const icon = document.getElementById('carrierIcon');
+    sec.classList.toggle('expanded');
+    if (sec.classList.contains('expanded')) {
+      icon.className = 'bi bi-chevron-up';
+    } else {
+      icon.className = 'bi bi-chevron-down';
+    }
+  }
+
+  function switchTab(tabId, btnElement) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+    
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    
+    activeTab = tabId;
+  }
+
+  // --- STANDARD UPDATE LOGIC (Maintained exactly as original) ---
+  function submitStatusUpdate() {
+    const status = document.getElementById('scanStatus').value;
+    const location = document.getElementById('scanLocation').value.trim();
+    const customDate = document.getElementById('scanDate').value;
+    
+    let fwdAgent = "";
+    let fwdDocket = "";
+    
+    if (activeTab === 'single') {
+      fwdAgent = document.getElementById('fwdAgent').value.trim();
+      fwdDocket = document.getElementById('fwdDocket').value.trim();
+    }
+    
+    if (!status) return alert('Please select a Status Milestone.');
+
+    const commonArgs = [status, sessionUser.name, sessionUser.branch, location, "", customDate, fwdAgent, fwdDocket];
+
+    if (activeTab === 'single') {
+      const singleId = document.getElementById('scanSingleId').value.trim();
+      executeBackendCall('updateManualTrackingStatus', [singleId, ...commonArgs]);
+    } else if (activeTab === 'bulk') {
+      const rawIds = document.getElementById('scanBulkIds').value.trim();
+      const bulkIds = rawIds.split(/[\n,]+/).map(id => id.trim()).filter(id => id !== '');
+      executeBackendCall('updateBulkManualTrackingStatus', [bulkIds, ...commonArgs]);
+    } else if (activeTab === 'consol') {
+      const consolId = document.getElementById('scanConsolId').value.trim();
+      executeBackendCall('updateConsolidationTrackingStatus', [consolId, ...commonArgs]);
+    }
+  }
+
+  function executeBackendCall(functionName, argsArray) {
+    const btn = document.getElementById('updateBtn');
+    btn.disabled = true;
+    btn.innerHTML = 'Committing...';
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        alert(res.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check2-circle"></i> Commit Record';
+      })
+      .withFailureHandler(function(error) {
+        alert('Error: ' + error.message);
+        btn.disabled = false;
+      })
+      [functionName](...argsArray); 
+  }
+</script>
+</body>
+</html>
