@@ -426,10 +426,8 @@
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
-      // 1. Clean the scanned ID
       const orderNo = encodeURIComponent(scannedId.trim());
-      
-      // 2. Fetch DIRECTLY from your server, bypassing Google
+      // Calling your server directly, completely bypassing Google Apps Script
       const targetUrl = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
       
       const response = await fetch(targetUrl, {
@@ -440,16 +438,15 @@
         }
       });
 
-      // 3. Format the response to match our existing logic
-      const apiData = await response.json();
-      const res = { success: response.ok, apiData: apiData };
+      // If this throws a CORS error in your browser console, the developer hasn't added the headers yet!
+      if (!response.ok) throw new Error("Server rejected the request.");
       
-      // Verify the external API returned success
-      if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data && res.apiData.data.length > 0) {
+      const apiResponse = await response.json();
+      
+      if (apiResponse && apiResponse.response === "success" && apiResponse.data && apiResponse.data.length > 0) {
         
-        const extData = res.apiData.data[0];
+        const extData = apiResponse.data[0];
 
-        // Map Alfarha API fields to our local schema
         tempFetchedData = {
           bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
@@ -464,7 +461,7 @@
           pcs: extData.total_box || "1"
         };
 
-        // Populate the Fast Action Modal
+        // Populate the Modal
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
         document.getElementById('fpOriginCity').innerText = tempFetchedData.originCity;
         document.getElementById('fpDestCity').innerText = tempFetchedData.destCity || "N/A";
@@ -472,27 +469,20 @@
         document.getElementById('fpConsignee').innerText = tempFetchedData.consignee || "N/A";
         document.getElementById('fpWeight').innerText = `${tempFetchedData.weight} KG / ${tempFetchedData.pcs} PCS`;
         
-        // Hide Loader and Trigger Modal
         document.getElementById('scanLoadingState').classList.add('d-none');
-        document.getElementById('scanHeroState').classList.remove('d-none'); // Reset background for next scan
+        document.getElementById('scanHeroState').classList.remove('d-none');
         document.getElementById('fetchedTicketModal').classList.add('active');
 
       } else {
         resetFetchState();
-        
-        let errMsg = "Failed to retrieve order data.";
-        if (res.apiData && res.apiData.message) {
-          errMsg = res.apiData.message;
-        } else if (res.message) {
-          errMsg = res.message;
-        }
-        
-        showAlert('danger', "Error: " + errMsg);
+        showAlert('danger', "Error: Could not find order data.");
       }
 
     } catch (error) {
       resetFetchState();
-      showAlert('danger', "Network error connecting to backend.");
+      // If you see this specific alert, the developer has NOT fixed the CORS headers yet.
+      showAlert('danger', "Browser Blocked Request. CORS Headers are missing on the server.");
+      console.error(error);
     }
   }
 
