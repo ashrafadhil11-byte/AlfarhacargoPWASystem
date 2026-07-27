@@ -426,17 +426,18 @@
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
-      const response = await fetch(GOOGLE_API_URL, {
+      const orderNo = encodeURIComponent(scannedId.trim());
+      const targetUrl = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
+      
+      const response = await fetch(targetUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: "fetchExternalOrder",
-          orderNo: scannedId 
-        })
+        headers: {
+          'X-API-KEY': 'R681hJQUTSXBqf6QHxLasBln2x0',
+          'Accept': 'application/json'
+        }
       });
 
-      const res = await response.json();
+      const res = { success: response.ok, apiData: await response.json() };
       
       // Verify the external API returned success
       if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data && res.apiData.data.length > 0) {
