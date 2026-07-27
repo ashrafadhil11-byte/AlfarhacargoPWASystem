@@ -419,7 +419,7 @@
     document.getElementById('packageType').value = 'Parcel';
   }
 
-  // --- LIVE SCAN & FETCH EXTERNAL API ---
+  // --- LIVE SCAN & FETCH EXTERNAL API (VERCEL PROXY) ---
   async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
     document.getElementById('scanLoadingState').classList.remove('d-none');
@@ -432,27 +432,13 @@
       const targetUrl = "/api/order-proxy?order_no=" + orderNo;
       
       const response = await fetch(targetUrl, {
-        method: 'GET', // Changed to GET because the proxy handles the POST
+        method: 'GET', // Vercel handles the POST to Al-Farha behind the scenes
         headers: {
           'Accept': 'application/json'
         }
       });
 
       if (!response.ok) throw new Error("Vercel Proxy rejected the request.");
-      
-      const apiResponse = await response.json();
-      
-      const response = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: {
-          'X-API-KEY': 'R681hJQUTSXBqf6QHxLasBln2x0',
-          'Accept': 'application/json'
-        }
-      });
-      // ... rest of the code remains exactly the same
-
-      // If this throws a CORS error in your browser console, the developer hasn't added the headers yet!
-      if (!response.ok) throw new Error("Server rejected the request.");
       
       const apiResponse = await response.json();
       
@@ -493,8 +479,7 @@
 
     } catch (error) {
       resetFetchState();
-      // If you see this specific alert, the developer has NOT fixed the CORS headers yet.
-      showAlert('danger', "Browser Blocked Request. CORS Headers are missing on the server.");
+      showAlert('danger', "Connection Error: Cloudflare blocked the Vercel Proxy.");
       console.error(error);
     }
   }
