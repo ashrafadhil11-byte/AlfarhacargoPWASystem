@@ -427,10 +427,20 @@
 
     try {
       const orderNo = encodeURIComponent(scannedId.trim());
-      const targetUrl = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
       
-      // Wrap the target URL in the CORS proxy
-      const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+      // Ping the new Vercel serverless proxy we just built!
+      const targetUrl = "/api/order-proxy?order_no=" + orderNo;
+      
+      const response = await fetch(targetUrl, {
+        method: 'GET', // Changed to GET because the proxy handles the POST
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error("Vercel Proxy rejected the request.");
+      
+      const apiResponse = await response.json();
       
       const response = await fetch(proxyUrl, {
         method: 'POST',
