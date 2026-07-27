@@ -426,7 +426,10 @@
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
+      // 1. Clean the scanned ID
       const orderNo = encodeURIComponent(scannedId.trim());
+      
+      // 2. Fetch DIRECTLY from your server, bypassing Google
       const targetUrl = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
       
       const response = await fetch(targetUrl, {
@@ -437,7 +440,9 @@
         }
       });
 
-      const res = { success: response.ok, apiData: await response.json() };
+      // 3. Format the response to match our existing logic
+      const apiData = await response.json();
+      const res = { success: response.ok, apiData: apiData };
       
       // Verify the external API returned success
       if (res.success && res.apiData && res.apiData.response === "success" && res.apiData.data && res.apiData.data.length > 0) {
