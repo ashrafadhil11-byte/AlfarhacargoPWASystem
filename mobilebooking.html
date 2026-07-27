@@ -427,16 +427,19 @@
 
     try {
       const orderNo = encodeURIComponent(scannedId.trim());
-      // Calling your server directly, completely bypassing Google Apps Script
       const targetUrl = "https://alfarhaonline.com/api/order-details?order_no=" + orderNo;
       
-      const response = await fetch(targetUrl, {
+      // Wrap the target URL in the CORS proxy
+      const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+      
+      const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'X-API-KEY': 'R681hJQUTSXBqf6QHxLasBln2x0',
           'Accept': 'application/json'
         }
       });
+      // ... rest of the code remains exactly the same
 
       // If this throws a CORS error in your browser console, the developer hasn't added the headers yet!
       if (!response.ok) throw new Error("Server rejected the request.");
