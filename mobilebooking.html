@@ -420,19 +420,20 @@
   }
 
   // --- LIVE SCAN & FETCH EXTERNAL API (VERCEL PROXY) ---
+  // --- LIVE SCAN & FETCH EXTERNAL API ---
   async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
     document.getElementById('scanLoadingState').classList.remove('d-none');
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
+      // This automatically turns spaces into %20 so we don't get 500 errors!
       const orderNo = encodeURIComponent(scannedId.trim());
       
-      // Ping the new Vercel serverless proxy we just built!
       const targetUrl = "/api/order-proxy?order_no=" + orderNo;
       
       const response = await fetch(targetUrl, {
-        method: 'GET', // Vercel handles the POST to Al-Farha behind the scenes
+        method: 'GET',
         headers: {
           'Accept': 'application/json'
         }
@@ -446,17 +447,19 @@
         
         const extData = apiResponse.data[0];
 
+        // Mapping using the EXACT keys from your Apps Script diagnostic!
         tempFetchedData = {
-          bookingID: (extData["o unique id"] || scannedId).replace(/\s+/g, ''),
+          bookingID: (extData.o_unique_id || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
-          shipperPhone: extData["sender phone"] || "",
-          consignee: extData["receiver name"] || "",
+          shipperPhone: extData.sender_phone || "",
+          consignee: extData.receiver_name || "",
           originCity: extData.booking_branch || sessionUser.branch, 
           originCountry: extData.order_from || "Oman", 
-          destCity: extData.receiver_district || "",
-          destCountry: extData.receiver_country || "",
+          // The log cut off at receiver_distr... assuming it's receiver_district
+          destCity: extData.receiver_district || "", 
+          destCountry: "Nepal", // Or map if the server provides receiver_country
           packageType: extData.cargotype || "Parcel",
-          weight: extData.total_weight || "0",
+          weight: extData.total_weight || "0", 
           pcs: extData.total_box || "1"
         };
 
@@ -474,13 +477,12 @@
 
       } else {
         resetFetchState();
-        // This will print EXACTLY what the database is saying back to us
-        showAlert('danger', "Server replied: " + JSON.stringify(apiResponse));
+        showAlert('danger', "Error: Order number not found in database.");
       }
 
     } catch (error) {
       resetFetchState();
-      showAlert('danger', "Connection Error: Cloudflare blocked the Vercel Proxy.");
+      showAlert('danger', "Connection Error: Failed to reach the server.");
       console.error(error);
     }
   }
