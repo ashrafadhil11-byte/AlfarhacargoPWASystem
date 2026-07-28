@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Only allow GET requests for this proxy
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -11,20 +10,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Ping the Al-Farha server securely from Vercel's backend
     const targetUrl = `https://alfarhaonline.com/api/order-details?order_no=${encodeURIComponent(order_no)}`;
+    const apiKey = 'R681hJQUTSXBqf6QHxLasBln2x0';
     
+    // We are firing the API key at the server from every possible angle
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
-        'X-API-KEY': 'R681hJQUTSXBqf6QHxLasBln2x0',
-        'Accept': 'application/json'
-      }
+        'X-API-KEY': apiKey,
+        'security-token': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        order_no: order_no,
+        token: apiKey,
+        security_token: apiKey
+      })
     });
 
     const data = await response.json();
 
-    // Attach the exact CORS headers your mobile browser is begging for
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.status(200).json(data);
