@@ -75,13 +75,24 @@
     .btn-save-fast:active { transform: scale(0.98); }
 
     /* =======================================
-       FAST SCAN UI (Hero State)
+       COMPACT SCAN UI (Direction 3)
        ======================================= */
-    .fast-scan-hero { background: #0f172a; border-radius: 24px; padding: 50px 20px; text-align: center; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px;}
-    .fast-scan-hero i { font-size: 4rem; color: #38bdf8; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
-    .fast-scan-title { font-family: 'Lexend', sans-serif; font-size: 1.3rem; font-weight: 700; margin: 0 0 10px 0; }
-    .fast-scan-desc { font-size: 0.9rem; color: #94a3b8; margin: 0 0 30px 0; max-width: 250px; line-height: 1.4;}
-    .btn-trigger-camera { background: #38bdf8; color: #0f172a; border: none; padding: 18px 30px; border-radius: 16px; font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 1.1rem; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; width: 100%; justify-content: center;}
+    .compact-scan-card { background: var(--brand-accent); color: white; border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2); position: relative; overflow: hidden; }
+    .compact-scan-card::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: none; }
+    .csc-left { display: flex; align-items: center; gap: 16px; z-index: 1; }
+    .csc-icon { font-size: 2.5rem; color: #a5b4fc; }
+    .csc-text h3 { margin: 0 0 4px 0; font-family: 'Lexend', sans-serif; font-size: 1.15rem; font-weight: 700; }
+    .csc-text p { margin: 0; font-size: 0.85rem; color: #e0e7ff; }
+    .btn-csc-scan { background: white; color: var(--brand-accent); border: none; width: 50px; height: 50px; border-radius: 14px; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .btn-csc-scan:active { transform: scale(0.95); }
+
+    .manual-fetch-divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; margin: 24px 0; }
+    .manual-fetch-divider::before, .manual-fetch-divider::after { content: ''; flex: 1; border-bottom: 1px dashed #cbd5e0; }
+    .manual-fetch-divider::before { margin-right: 14px; }
+    .manual-fetch-divider::after { margin-left: 14px; }
+    
+    .loading-state-compact { text-align: center; padding: 40px 20px; }
+    .loading-state-compact i { animation: spin 1s linear infinite; display: inline-block; font-size: 3rem; color: var(--brand-accent); margin-bottom: 20px; }
 
     /* --- BOTTOM SHEETS MODAL (The Popup Preview) --- */
     .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end; }
@@ -114,7 +125,6 @@
 
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
@@ -155,7 +165,6 @@
         </div>
       </div>
       
-      <!-- ADDED: Package Type Dropdown -->
       <div class="input-group">
         <label class="input-label">Package Type</label>
         <select id="packageType" class="minimal-input">
@@ -199,23 +208,45 @@
     <!-- ============================================== -->
     <!-- TAB 2: FAST SCAN & FETCH                       -->
     <!-- ============================================== -->
-    <div id="tab-fetch" class="content-card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+    <div id="tab-fetch" class="content-card" style="padding: 16px; border: none; box-shadow: none; background: transparent;">
       
-      <!-- Hero Scan Button -->
-      <div id="scanHeroState" class="fast-scan-hero">
-        <i class="bi bi-qr-code-scan"></i>
-        <h3 class="fast-scan-title">Rapid Scanner</h3>
-        <p class="fast-scan-desc">Point at barcode. Verify in popup. Save instantly.</p>
-        <button type="button" class="btn-trigger-camera" onclick="triggerBookingScan('fetch')">
-          <i class="bi bi-camera"></i> Tap to Scan
-        </button>
+      <!-- Default State: Compact Card + Manual Input -->
+      <div id="scanHeroState">
+        
+        <!-- The Sleek Scanner Card -->
+        <div class="compact-scan-card" onclick="triggerBookingScan('fetch')">
+          <div class="csc-left">
+            <i class="bi bi-qr-code-scan csc-icon"></i>
+            <div class="csc-text">
+              <h3>Rapid Scanner</h3>
+              <p>Tap to open camera</p>
+            </div>
+          </div>
+          <button type="button" class="btn-csc-scan">
+            <i class="bi bi-camera"></i>
+          </button>
+        </div>
+
+        <div class="manual-fetch-divider">OR</div>
+
+        <!-- Manual Fallback Search -->
+        <div class="input-group">
+          <label class="input-label">Search by Booking ID</label>
+          <div class="input-with-btn">
+            <input type="text" id="manualFetchInput" class="minimal-input" placeholder="Enter ID manually..." autocomplete="off">
+            <button type="button" class="btn-scan-input" style="background: var(--brand-accent);" onclick="triggerManualFetch()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Loading State -->
-      <div id="scanLoadingState" class="fast-scan-hero d-none" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 3rem; color: var(--brand-accent); margin-bottom: 20px;"></i>
-        <h3 class="fast-scan-title">Fetching Data...</h3>
-        <p class="fast-scan-desc" style="color: var(--text-muted);">Looking up <span id="fetchingIdTxt" style="font-weight:700; color:var(--text-main);"></span></p>
+      <!-- Loading State (Matches light theme) -->
+      <div id="scanLoadingState" class="loading-state-compact d-none">
+        <i class="bi bi-arrow-repeat"></i>
+        <h3 style="font-family: 'Lexend', sans-serif; font-size: 1.2rem; margin-bottom: 8px; color: var(--text-main);">Fetching Data...</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Looking up <span id="fetchingIdTxt" style="font-weight:700; color:var(--text-main);"></span></p>
       </div>
 
     </div>
@@ -345,7 +376,7 @@
     }
   }
 
-  // Resets the scanner tab back to the giant "Launch Camera" button
+  // Resets the scanner tab back to the default state
   function resetFetchState() {
     tempFetchedData = null;
     document.getElementById('scanLoadingState').classList.add('d-none');
@@ -433,6 +464,17 @@
     document.getElementById('packageType').value = 'Parcel';
   }
 
+  // --- MANUAL FETCH HELPER ---
+  function triggerManualFetch() {
+    const manualId = document.getElementById('manualFetchInput').value.trim();
+    if (!manualId) {
+      return showAlert('danger', 'Please enter a Booking ID to search.');
+    }
+    // Clear the input field and trigger the API
+    document.getElementById('manualFetchInput').value = '';
+    triggerApiFetch(manualId);
+  }
+
   // --- LIVE SCAN & FETCH EXTERNAL API ---
   async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
@@ -460,7 +502,7 @@
 
         // 1. Cargo Type Formatting Logic
         let rawType = (extData.cargotype || "").trim().toUpperCase();
-        let formattedCargoType = "Parcel"; // Default Fallback
+        let formattedCargoType = "Parcel"; 
         
         if (rawType === "D2D") formattedCargoType = "Parcel";
         else if (rawType === "MAIL") formattedCargoType = "Document";
@@ -487,7 +529,12 @@
         // Lookup the city based on sessionUser.branch, fallback to the raw branch name if not found
         let resolvedOriginCity = branchMapping[sessionUser.branch] || sessionUser.branch || "Unknown City";
 
-        // 3. Data Mapping
+        // 3. Robust Weight & Pieces Fallback
+        // (Checks multiple possible database keys so it doesn't default to "0" if total_weight is wrong)
+        const fetchedWeight = extData.weight || extData.actual_weight || extData.act_weight || extData.total_weight || extData.chargeable_weight || "0";
+        const fetchedPcs = extData.pcs || extData.pieces || extData.total_box || extData.total_boxes || "1";
+
+        // 4. Data Mapping
         tempFetchedData = {
           bookingID: (extData.o_unique_id || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
@@ -498,11 +545,11 @@
           destCity: extData.receiver_district || "", 
           destCountry: extData.receiver_country || "Nepal",
           packageType: formattedCargoType,
-          weight: extData.total_weight || "0", 
-          pcs: extData.total_box || "1"
+          weight: fetchedWeight, 
+          pcs: fetchedPcs
         };
 
-        // 4. Populate the Modal UI
+        // 5. Populate the Modal UI
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
         document.getElementById('fpOriginCity').innerText = tempFetchedData.originCity;
         document.getElementById('fpOriginCountry').innerText = tempFetchedData.originCountry.toUpperCase();
@@ -531,6 +578,7 @@
       console.error(error);
     }
   }
+
   // Edit Fetched Data before saving
   function editFetchedData() {
     if (!tempFetchedData) return;
