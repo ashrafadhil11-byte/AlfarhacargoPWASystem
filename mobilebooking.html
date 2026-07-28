@@ -474,7 +474,8 @@
 
       } else {
         resetFetchState();
-        showAlert('danger', "Error: Could not find order data.");
+        // This will print EXACTLY what the database is saying back to us
+        showAlert('danger', "Server replied: " + JSON.stringify(apiResponse));
       }
 
     } catch (error) {
