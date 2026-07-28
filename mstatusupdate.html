@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   
-  <!-- External Scanner Library (Updated) -->
+  <!-- External Scanner Library -->
   <script src="scanner.js"></script>
 
   <style>
@@ -275,7 +275,7 @@
     }
   }
 
-  // --- SCANNER INTEGRATION (actualscanner.js) ---
+  // --- SCANNER INTEGRATION (scanner.js) ---
   let activeTargetInput = null;
   let isContinuousScan = false;
 
@@ -284,11 +284,11 @@
     isContinuousScan = continuous;
     document.getElementById('scannerModal').classList.add('active');
     
-    // Calling standard functions expected in actualscanner.js
+    // Calling standard functions expected in scanner.js
     if (typeof initBarcodeScanner === 'function') {
       initBarcodeScanner('camera-stream', handleScanResult);
     } else {
-      console.warn("actualscanner.js not loaded or initBarcodeScanner is missing.");
+      console.warn("scanner.js not loaded or initBarcodeScanner is missing.");
       showAlert('danger', 'Scanner module failed to load.');
     }
   }
