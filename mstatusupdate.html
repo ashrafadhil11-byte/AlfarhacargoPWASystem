@@ -93,7 +93,7 @@
 <div class="mobile-app">
   <div class="bg-glow"></div>
 
-  <!-- Navigation Container (Dynamically injected by nav.js) -->
+  <!-- Navigation Container -->
   <div id="navigation-container"></div>
 
   <div class="main-scroll-area">
@@ -237,13 +237,16 @@
 <script src="/nav.js"></script>
 
 <script>
+  // YOUR LIVE GOOGLE API URL (Replaced from mobilebooking.html)
+  const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
+
   // Initialize Page and Navbar on Load
   document.addEventListener("DOMContentLoaded", function() {
     if (typeof initNavigation === 'function') {
       initNavigation('StatusUpdate'); 
     }
     document.getElementById('inventoryBranchName').innerText = sessionUser.branch;
-    loadInventory(); // Fetch stock on load
+    loadInventory(); 
   });
 
   // Ensure Session
@@ -270,29 +273,29 @@
     activeTab = tabId;
   }
 
-  // --- SCANNER INTEGRATION (Utilizing your existing scanner.js) ---
+  // --- SCANNER INTEGRATION (Utilizing scanner.js) ---
   function triggerScanner(targetInputId, isContinuous = false) {
     if (typeof openScanner === 'function') {
-      // Calling the same openScanner function used in mobilebooking.html
-      openScanner('input', function(decodedText) {
+      // Calls the same function used in your mobilebooking.html!
+      openScanner('input', function(decodedText, returnedMode) {
+        const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById(targetInputId);
         
         if (isContinuous) {
-          inputField.value = inputField.value ? inputField.value + ",\n" + decodedText : decodedText;
+          inputField.value = inputField.value ? inputField.value + ",\n" + trimmedCode : trimmedCode;
         } else {
-          inputField.value = decodedText;
+          inputField.value = trimmedCode;
         }
         
         if(navigator.vibrate) navigator.vibrate(100);
+        showAlert('success', 'Barcode scanned successfully.');
       });
     } else {
-      showAlert('danger', 'Scanner script missing. Please check connection.');
+      showAlert('danger', 'Scanner module failed to load. Check scanner.js');
     }
   }
 
   // --- BACKEND API CALLS ---
-  const GAS_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; 
-
   // 1. Submit the Status / Carrier Update
   async function submitStatusUpdate() {
     const status = document.getElementById('scanStatus').value;
@@ -336,7 +339,6 @@
       if (!carrierId) return showAlert('danger', 'Please enter the Booking or Master ID.');
       if (!fwdAgent || !fwdDocket) return showAlert('danger', 'Please provide both Forwarding Agent and Docket Number.');
 
-      // Assumes standard manual tracking update can accept carrier details
       actionName = 'updateManualTrackingStatus'; 
       payloadArgs = [String(carrierId), status, sessionUser.name, sessionUser.branch, location, "", customDate, fwdAgent, fwdDocket];
     }
@@ -350,7 +352,7 @@
     btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Committing...';
 
     try {
-      const response = await fetch(GAS_WEB_APP_URL, {
+      const response = await fetch(GOOGLE_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         redirect: 'follow',
@@ -362,7 +364,7 @@
       if (result.success) {
         showAlert('success', result.message || 'Update logged successfully!');
         
-        // Clear inputs on success
+        // Clear inputs
         document.getElementById('scanSingleId').value = '';
         document.getElementById('scanBulkIds').value = '';
         document.getElementById('scanConsolId').value = '';
@@ -392,14 +394,13 @@
     loadingUI.classList.remove('d-none');
     emptyUI.classList.add('d-none');
     listUI.classList.add('d-none');
-    listUI.innerHTML = ''; // Clear old data
+    listUI.innerHTML = ''; 
 
     try {
-      // NOTE: This assumes your GAS backend has a "getBranchInventory" action.
-      // If it doesn't yet, this will fail gracefully and just show an empty list.
-      const response = await fetch(GAS_WEB_APP_URL, {
+      const response = await fetch(GOOGLE_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        redirect: 'follow',
         body: JSON.stringify({ 
           action: 'getBranchInventory', 
           branch: sessionUser.branch 
@@ -407,6 +408,12 @@
       });
       
       const res = await response.json();
+      
+      // If the backend function doesn't exist yet, this stops it from crashing
+      if (!res.success) {
+        throw new Error(res.message || "Backend inventory function not found");
+      }
+      
       const inventoryData = res.data || [];
 
       loadingUI.classList.add('d-none');
@@ -415,17 +422,15 @@
         emptyUI.classList.remove('d-none');
       } else {
         inventoryData.forEach(item => {
-          // Fallbacks in case keys differ in your database
           const id = item.bookingID || item.id || "Unknown ID";
           const dest = item.destCity || item.destination || "N/A";
           const status = item.status || "Pending";
-          const date = item.date ? new Date(item.date).toLocaleDateString() : "";
           
           listUI.innerHTML += `
             <div class="inv-list-item">
               <div>
                 <div class="inv-id">${id}</div>
-                <div class="inv-details"><i class="bi bi-geo-alt"></i> To: ${dest} &nbsp; ${date}</div>
+                <div class="inv-details"><i class="bi bi-geo-alt"></i> To: ${dest}</div>
               </div>
               <div class="inv-status-badge">${status}</div>
             </div>
@@ -433,9 +438,8 @@
         });
         listUI.classList.remove('d-none');
       }
-
     } catch (error) {
-      loadingUI.innerHTML = `<i class="bi bi-exclamation-triangle" style="font-size: 2rem; color: #dc2626;"></i><p style="margin-top:10px;">Failed to load inventory.</p>`;
+      loadingUI.innerHTML = `<i class="bi bi-info-circle" style="font-size: 2rem; color: var(--text-muted);"></i><p style="margin-top:10px;">Please configure <b>getBranchInventory</b> in Google Apps Script.</p>`;
     }
   }
 </script>
