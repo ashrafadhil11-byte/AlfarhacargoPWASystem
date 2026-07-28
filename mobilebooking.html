@@ -466,16 +466,34 @@
         else if (rawType === "MAIL") formattedCargoType = "Document";
         else if (rawType === "AIR") formattedCargoType = "Air Freight";
         else if (rawType === "SEA") formattedCargoType = "Sea Freight";
-        else if (rawType !== "") formattedCargoType = extData.cargotype; // Use raw if not one of the above
+        else if (rawType !== "") formattedCargoType = extData.cargotype; 
 
-        // 2. Data Mapping
+        // 2. Branch to Origin City Mapping Logic
+        const branchMapping = {
+          "ALFHQ": "Salalah",
+          "Al-Farha Head Office": "Salalah",
+          "ALFSLL": "Salalah",
+          "Al-Farha Cargo Salalah": "Salalah",
+          "ALFSNY": "Sannayya",
+          "Al-Farha Cargo Sannayya": "Sannayya",
+          "ALFTMT": "Thumraith",
+          "Al-Farha Cargo Thumraith": "Thumraith",
+          "ALFDQM": "Duqm",
+          "Al-Farha Cargo Duqm": "Duqm",
+          "ALFWR-SLL": "Sannayya",
+          "Al-Farha Warehouse": "Sannayya"
+        };
+        
+        // Lookup the city based on sessionUser.branch, fallback to the raw branch name if not found
+        let resolvedOriginCity = branchMapping[sessionUser.branch] || sessionUser.branch || "Unknown City";
+
+        // 3. Data Mapping
         tempFetchedData = {
           bookingID: (extData.o_unique_id || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
           shipperPhone: extData.sender_phone || "",
           consignee: extData.receiver_name || "",
-          // Forces the Origin City to be the active logged-in user's branch
-          originCity: sessionUser.branch || "Unknown Branch", 
+          originCity: resolvedOriginCity, 
           originCountry: extData.order_from || "Oman", 
           destCity: extData.receiver_district || "", 
           destCountry: extData.receiver_country || "Nepal",
@@ -484,7 +502,7 @@
           pcs: extData.total_box || "1"
         };
 
-        // 3. Populate the Modal UI
+        // 4. Populate the Modal UI
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
         document.getElementById('fpOriginCity').innerText = tempFetchedData.originCity;
         document.getElementById('fpOriginCountry').innerText = tempFetchedData.originCountry.toUpperCase();
