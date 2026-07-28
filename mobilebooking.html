@@ -253,22 +253,36 @@
         <div class="pc-id" id="fpId">---</div>
         
         <div class="pc-route">
-          <div class="pc-city" id="fpOriginCity">---</div>
-          <i class="bi bi-arrow-right" style="color: #94a3b8; font-size: 1.2rem;"></i>
-          <div class="pc-city" id="fpDestCity" style="text-align: right;">---</div>
+          <div style="text-align: left;">
+            <div class="pc-city" id="fpOriginCity">---</div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-top: 2px;" id="fpOriginCountry">---</div>
+          </div>
+          <i class="bi bi-airplane-engines" style="color: var(--brand-accent); font-size: 1.4rem; opacity: 0.8;"></i>
+          <div style="text-align: right;">
+            <div class="pc-city" id="fpDestCity">---</div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-top: 2px;" id="fpDestCountry">---</div>
+          </div>
         </div>
 
+        <div class="pc-row">
+          <span class="pc-lbl"><i class="bi bi-box-seam"></i> Cargo Type</span>
+          <span class="pc-val"><span id="fpCargoType" style="background:#eef2ff; color:var(--brand-accent); padding:4px 8px; border-radius:6px; font-size:0.8rem;">---</span></span>
+        </div>
+        <div class="pc-row">
+          <span class="pc-lbl"><i class="bi bi-boxes"></i> Weight & PCS</span>
+          <span class="pc-val" id="fpWeight">---</span>
+        </div>
         <div class="pc-row">
           <span class="pc-lbl"><i class="bi bi-person-up"></i> Sender</span>
           <span class="pc-val" id="fpShipper">---</span>
         </div>
         <div class="pc-row">
-          <span class="pc-lbl"><i class="bi bi-person-down"></i> Consignee</span>
-          <span class="pc-val" id="fpConsignee">---</span>
+          <span class="pc-lbl"><i class="bi bi-telephone"></i> Sender Phone</span>
+          <span class="pc-val" id="fpShipperPhone">---</span>
         </div>
         <div class="pc-row">
-          <span class="pc-lbl"><i class="bi bi-boxes"></i> Box Specs</span>
-          <span class="pc-val" id="fpWeight">---</span>
+          <span class="pc-lbl"><i class="bi bi-person-down"></i> Consignee</span>
+          <span class="pc-val" id="fpConsignee">---</span>
         </div>
       </div>
 
@@ -419,7 +433,6 @@
     document.getElementById('packageType').value = 'Parcel';
   }
 
-  // --- LIVE SCAN & FETCH EXTERNAL API (VERCEL PROXY) ---
   // --- LIVE SCAN & FETCH EXTERNAL API ---
   async function triggerApiFetch(scannedId) {
     document.getElementById('scanHeroState').classList.add('d-none');
@@ -427,9 +440,7 @@
     document.getElementById('fetchingIdTxt').innerText = scannedId;
 
     try {
-      // This automatically turns spaces into %20 so we don't get 500 errors!
       const orderNo = encodeURIComponent(scannedId.trim());
-      
       const targetUrl = "/api/order-proxy?order_no=" + orderNo;
       
       const response = await fetch(targetUrl, {
@@ -447,29 +458,45 @@
         
         const extData = apiResponse.data[0];
 
-        // Mapping using the EXACT keys from your Apps Script diagnostic!
+        // 1. Cargo Type Formatting Logic
+        let rawType = (extData.cargotype || "").trim().toUpperCase();
+        let formattedCargoType = "Parcel"; // Default Fallback
+        
+        if (rawType === "D2D") formattedCargoType = "Parcel";
+        else if (rawType === "MAIL") formattedCargoType = "Document";
+        else if (rawType === "AIR") formattedCargoType = "Air Freight";
+        else if (rawType === "SEA") formattedCargoType = "Sea Freight";
+        else if (rawType !== "") formattedCargoType = extData.cargotype; // Use raw if not one of the above
+
+        // 2. Data Mapping
         tempFetchedData = {
           bookingID: (extData.o_unique_id || scannedId).replace(/\s+/g, ''),
           shipper: extData.sender_name || "",
           shipperPhone: extData.sender_phone || "",
           consignee: extData.receiver_name || "",
-          originCity: extData.booking_branch || sessionUser.branch, 
+          // Forces the Origin City to be the active logged-in user's branch
+          originCity: sessionUser.branch || "Unknown Branch", 
           originCountry: extData.order_from || "Oman", 
-          // The log cut off at receiver_distr... assuming it's receiver_district
           destCity: extData.receiver_district || "", 
-          destCountry: "Nepal", // Or map if the server provides receiver_country
-          packageType: extData.cargotype || "Parcel",
+          destCountry: extData.receiver_country || "Nepal",
+          packageType: formattedCargoType,
           weight: extData.total_weight || "0", 
           pcs: extData.total_box || "1"
         };
 
-        // Populate the Modal
+        // 3. Populate the Modal UI
         document.getElementById('fpId').innerText = tempFetchedData.bookingID;
         document.getElementById('fpOriginCity').innerText = tempFetchedData.originCity;
+        document.getElementById('fpOriginCountry').innerText = tempFetchedData.originCountry.toUpperCase();
         document.getElementById('fpDestCity').innerText = tempFetchedData.destCity || "N/A";
-        document.getElementById('fpShipper').innerText = tempFetchedData.shipper || "N/A";
-        document.getElementById('fpConsignee').innerText = tempFetchedData.consignee || "N/A";
+        document.getElementById('fpDestCountry').innerText = tempFetchedData.destCountry.toUpperCase();
+        
+        document.getElementById('fpCargoType').innerText = tempFetchedData.packageType;
         document.getElementById('fpWeight').innerText = `${tempFetchedData.weight} KG / ${tempFetchedData.pcs} PCS`;
+        
+        document.getElementById('fpShipper').innerText = tempFetchedData.shipper || "N/A";
+        document.getElementById('fpShipperPhone').innerText = tempFetchedData.shipperPhone || "N/A";
+        document.getElementById('fpConsignee').innerText = tempFetchedData.consignee || "N/A";
         
         document.getElementById('scanLoadingState').classList.add('d-none');
         document.getElementById('scanHeroState').classList.remove('d-none');
@@ -486,7 +513,6 @@
       console.error(error);
     }
   }
-
   // Edit Fetched Data before saving
   function editFetchedData() {
     if (!tempFetchedData) return;
