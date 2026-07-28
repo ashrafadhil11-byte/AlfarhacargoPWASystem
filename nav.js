@@ -9,7 +9,7 @@ function injectBottomNav() {
     { name: 'Home', icon: 'bi-grid-fill', link: '/mobiledashboard.html', activeKeywords: ['dashboard', 'index'] },
     { name: 'Book', icon: 'bi-plus-circle-fill', link: '/mobilebooking.html', activeKeywords: ['booking'] },
     { name: 'Inv', icon: 'bi-box-seam', link: '/transfers.html', activeKeywords: ['transfers', 'inv'] },
-    { name: 'Scan', icon: 'bi-upc-scan', link: '/statusupdate.html', activeKeywords: ['scan', 'status'] }
+    { name: 'Scan', icon: 'bi-upc-scan', link: '/mstatusupdate.html', activeKeywords: ['scan', 'status'] }
   ];
 
   // Create the nav container
