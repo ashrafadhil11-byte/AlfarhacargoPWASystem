@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   
   <!-- Required Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
@@ -61,11 +60,6 @@
     .minimal-input:focus { background-color: #ffffff; border-color: var(--brand-accent); }
     .btn-scan-input { background: var(--text-main); color: white; border: none; border-radius: 12px; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
     
-    /* Upload Zone */
-    .upload-zone { border: 2px dashed #cbd5e0; background-color: #f8fafc; border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s; }
-    .upload-icon { font-size: 3rem; color: var(--brand-accent); margin-bottom: 12px; display: block;}
-    .upload-text { font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text-main); }
-    
     /* Buttons */
     .btn-primary-custom { font-family: 'Lexend', sans-serif; font-weight: 600; background-color: var(--brand-accent); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; transition: all 0.2s; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;}
     .btn-primary-custom:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -75,7 +69,7 @@
     .btn-save-fast:active { transform: scale(0.98); }
 
     /* =======================================
-       COMPACT SCAN UI (Direction 3)
+       COMPACT SCAN UI
        ======================================= */
     .compact-scan-card { background: var(--brand-accent); color: white; border-radius: 16px; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2); position: relative; overflow: hidden; }
     .compact-scan-card::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: none; }
@@ -144,7 +138,6 @@
       <div class="admin-tabs">
         <button type="button" id="tabBtnSingle" class="tab-btn active" onclick="switchTab('single', this)"><i class="bi bi-pen"></i> Manual Entry</button>
         <button type="button" class="tab-btn" onclick="switchTab('fetch', this)"><i class="bi bi-upc-scan"></i> Scan & Fetch</button>
-        <button type="button" class="tab-btn" onclick="switchTab('bulk', this)"><i class="bi bi-cloud-upload"></i> Bulk CSV</button>
       </div>
     </div>
 
@@ -160,7 +153,7 @@
       <div class="input-group">
         <label class="input-label">Booking ID</label>
         <div class="input-with-btn">
-          <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., AFC-1001" autocomplete="off">
+          <input type="text" id="bookingID" class="minimal-input" placeholder="e.g., 0620366" autocomplete="off">
           <button type="button" class="btn-scan-input" onclick="triggerBookingScan('input')"><i class="bi bi-upc-scan"></i></button>
         </div>
       </div>
@@ -242,25 +235,13 @@
 
       </div>
 
-      <!-- Loading State (Matches light theme) -->
+      <!-- Loading State -->
       <div id="scanLoadingState" class="loading-state-compact d-none">
         <i class="bi bi-arrow-repeat"></i>
         <h3 style="font-family: 'Lexend', sans-serif; font-size: 1.2rem; margin-bottom: 8px; color: var(--text-main);">Fetching Data...</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem;">Looking up <span id="fetchingIdTxt" style="font-weight:700; color:var(--text-main);"></span></p>
       </div>
 
-    </div>
-
-    <!-- ============================================== -->
-    <!-- TAB 3: BULK UPLOAD                             -->
-    <!-- ============================================== -->
-    <div id="tab-bulk" class="content-card">
-      <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
-      <div class="upload-zone" onclick="document.getElementById('csvFileInput').click()">
-        <i class="bi bi-file-earmark-spreadsheet upload-icon"></i>
-        <div class="upload-text">Tap to select CSV file</div>
-      </div>
-      <button type="button" id="submitBulkBtn" class="btn-primary-custom d-none" onclick="submitBulkBookings()">Process Upload</button>
     </div>
 
   </div>
@@ -343,7 +324,6 @@
   if(!sessionUser) { window.location.href = '/login.html'; }
 
   // Globals
-  var parsedBulkData = []; 
   var tempFetchedData = null; 
 
   // --- UI CONTROLLERS ---
@@ -362,9 +342,7 @@
     alertBox.innerHTML = `<i class="bi bi-${icon}"></i> ` + message; 
     alertBox.style.display = 'flex'; 
     
-    // Scroll to top to ensure alert is seen
     document.querySelector('.main-scroll-area').scrollTo({top: 0, behavior: 'smooth'});
-    
     setTimeout(() => alertBox.style.display = 'none', 4000);
   }
 
@@ -406,7 +384,7 @@
   // --- SINGLE BOOKING (MANUAL) ---
   async function submitBooking() {
     const btn = document.getElementById('submitBtn'); 
-    const customId = document.getElementById('bookingID').value.trim();
+    const customId = String(document.getElementById('bookingID').value.trim()); // Enforcing String formatting
     if (!customId) return showAlert('danger', 'Please enter a Booking ID.');
 
     const formData = {
@@ -526,14 +504,13 @@
           "Al-Farha Warehouse": "Sannayya"
         };
         
-        // Lookup the city based on sessionUser.branch, fallback to the raw branch name if not found
         let resolvedOriginCity = branchMapping[sessionUser.branch] || sessionUser.branch || "Unknown City";
 
         // 3. Robust Weight & Pieces Fallback
         const fetchedWeight = extData.weight || extData.actual_weight || extData.act_weight || extData.total_weight || extData.chargeable_weight || "0";
         const fetchedPcs = extData.pcs || extData.pieces || extData.total_box || extData.total_boxes || "1";
 
-        // --- NEW: Convert ALL CAPS Receiver City to Title Case ---
+        // --- Title Case City Formatting ---
         let rawDestCity = extData.receiver_district || "";
         let formattedDestCity = rawDestCity.toLowerCase().replace(/\b\w/g, function(char) { 
           return char.toUpperCase(); 
@@ -541,13 +518,13 @@
 
         // 4. Data Mapping
         tempFetchedData = {
-          bookingID: (extData.o_unique_id || scannedId).replace(/\s+/g, ''),
+          bookingID: String((extData.o_unique_id || scannedId).replace(/\s+/g, '')), // Strictly cast to string to protect leading zeros
           shipper: extData.sender_name || "",
           shipperPhone: extData.sender_phone || "",
           consignee: extData.receiver_name || "",
           originCity: resolvedOriginCity, 
           originCountry: extData.order_from || "Oman", 
-          destCity: formattedDestCity, // Using the newly formatted Title Case city
+          destCity: formattedDestCity, 
           destCountry: extData.receiver_country || "Nepal",
           packageType: formattedCargoType,
           weight: fetchedWeight, 
@@ -641,61 +618,6 @@
       showAlert('danger', 'Network connection error.');
       btn.disabled = false; 
       btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Confirm & Save';
-    }
-  }
-
-  // --- BULK UPLOAD ---
-  function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    Papa.parse(file, {
-      header: true, skipEmptyLines: true,
-      complete: function(results) {
-        parsedBulkData = results.data;
-        if(parsedBulkData.length === 0) return showAlert('danger', 'CSV is empty.');
-        
-        document.getElementById('submitBulkBtn').classList.remove('d-none');
-        document.getElementById('submitBulkBtn').innerText = `Process ${parsedBulkData.length} Bookings`;
-        showAlert('success', 'File loaded successfully. Ready to process.');
-      }
-    });
-  }
-
-  async function submitBulkBookings() {
-    if (parsedBulkData.length === 0) return;
-    const btn = document.getElementById('submitBulkBtn');
-    btn.disabled = true; 
-    btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Uploading...';
-
-    try {
-      const response = await fetch(GOOGLE_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        redirect: 'follow',
-        body: JSON.stringify({
-          action: "createBulkBookings",
-          bulkData: parsedBulkData,
-          user: sessionUser.name,
-          branch: sessionUser.branch
-        })
-      });
-
-      const res = await response.json();
-      
-      if(res.success) { 
-        showAlert('success', res.message || "Bulk upload successful!"); 
-        document.getElementById('csvFileInput').value = ''; 
-        parsedBulkData = [];
-        btn.classList.add('d-none');
-      } else { 
-        showAlert('danger', res.message || "Upload failed."); 
-      }
-      btn.disabled = false;
-    } catch (error) {
-      showAlert('danger', 'Network connection error.');
-      btn.disabled = false;
-      btn.innerHTML = 'Process Upload';
     }
   }
 </script>
