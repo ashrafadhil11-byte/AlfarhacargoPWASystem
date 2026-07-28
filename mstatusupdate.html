@@ -12,8 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   
-  <!-- External Scanner Library -->
-  <script src="scanner.js"></script>
+  <!-- External Scanner Library (Your working scanner script) -->
+  <script src="/scanner.js"></script>
 
   <style>
     :root { 
@@ -33,7 +33,7 @@
     .mobile-app { display: flex; flex-direction: column; height: 100vh; width: 100vw; position: relative; overflow: hidden; }
     .bg-glow { position: fixed; top: -10%; right: -20%; width: 80vw; height: 80vw; border-radius: 50%; background: radial-gradient(circle, rgba(79,70,229,0.08) 0%, rgba(248,250,252,0) 70%); z-index: -1; pointer-events: none; }
     
-    .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-height) + 20px); -webkit-overflow-scrolling: touch; }
+    .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px 16px; padding-bottom: calc(var(--bottom-nav-height) + 40px); -webkit-overflow-scrolling: touch; }
     .main-scroll-area::-webkit-scrollbar { display: none; }
 
     /* Header */
@@ -42,8 +42,9 @@
     .page-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.4; }
     
     /* Segmented Control (Tabs) */
-    .segment-tabs { display: flex; background: #e2e8f0; padding: 4px; border-radius: 14px; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-    .seg-btn { flex: 1; background: transparent; border: none; font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.85rem; color: #475569; padding: 12px 0; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .segment-tabs { display: flex; background: #e2e8f0; padding: 4px; border-radius: 14px; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); overflow-x: auto; -webkit-overflow-scrolling: touch;}
+    .segment-tabs::-webkit-scrollbar { display: none; }
+    .seg-btn { flex: 1; min-width: 80px; background: transparent; border: none; font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.8rem; color: #475569; padding: 12px 6px; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;}
     .seg-btn.active { color: var(--brand-accent); background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
     /* Content Cards */
@@ -64,28 +65,17 @@
     .status-select { font-weight: 700; color: var(--brand-accent); border-color: #e0e7ff; background-color: #eef2ff; }
     .status-select:focus { border-color: var(--brand-accent); }
 
-    /* Carrier Section Accordion */
-    .carrier-toggle-btn { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px dashed #cbd5e0; padding: 16px; border-radius: 14px; cursor: pointer; color: var(--text-main); font-family: 'Lexend', sans-serif; font-size: 0.95rem; font-weight: 600; transition: all 0.2s; margin-top: 8px; }
-    .carrier-toggle-btn.active { background: #eef2ff; border-color: var(--brand-accent); color: var(--brand-accent); border-style: solid; }
-    .carrier-section { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; animation: fadeIn 0.3s ease; }
-    .carrier-section.expanded { display: block; }
-
     /* Action Buttons */
     .btn-primary-custom { font-family: 'Lexend', sans-serif; font-weight: 700; background-color: var(--brand-accent); color: white; border: none; padding: 18px; border-radius: 16px; width: 100%; cursor: pointer; transition: transform 0.1s; font-size: 1.05rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
     .btn-primary-custom:active { transform: scale(0.98); }
     .btn-primary-custom:disabled { opacity: 0.7; cursor: not-allowed; }
     
-    /* Full Screen Mobile Scanner Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000000; z-index: 9999; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    .modal-overlay.active { opacity: 1; pointer-events: all; }
-    .scanner-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); position: absolute; top: 0; width: 100%; z-index: 10; }
-    .scanner-title { color: white; font-family: 'Lexend', sans-serif; font-size: 1.2rem; margin: 0; font-weight: 600; }
-    .btn-close-scanner { background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    
-    #scanner-container { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-    #scanner-container video { width: 100%; height: 100%; object-fit: cover; }
-    .scan-guide { position: absolute; border: 3px solid #10b981; width: 70%; height: 150px; border-radius: 16px; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 100vmax rgba(0,0,0,0.6); pointer-events: none; }
-    .scan-instructions { position: absolute; bottom: 40px; width: 100%; text-align: center; color: white; font-size: 0.9rem; z-index: 10; font-family: 'Lexend', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    /* Inventory List */
+    .inv-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+    .inv-list-item:last-child { border-bottom: none; }
+    .inv-id { font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--brand-accent); margin-bottom: 4px;}
+    .inv-details { font-size: 0.8rem; color: var(--text-muted); }
+    .inv-status-badge { background: #eef2ff; color: var(--brand-accent); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'Lexend', sans-serif;}
 
     /* Alerts */
     .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
@@ -99,19 +89,6 @@
   </style>
 </head>
 <body>
-
-<!-- Full Screen Mobile Scanner -->
-<div class="modal-overlay" id="scannerModal">
-  <div class="scanner-header">
-    <h3 class="scanner-title"><i class="bi bi-upc-scan"></i> Scan Barcode</h3>
-    <button class="btn-close-scanner" onclick="stopScanner()"><i class="bi bi-x"></i></button>
-  </div>
-  <div id="scanner-container">
-    <video id="camera-stream" playsinline autoplay></video>
-    <div class="scan-guide"></div>
-    <div class="scan-instructions">Align barcode within the green box</div>
-  </div>
-</div>
 
 <div class="mobile-app">
   <div class="bg-glow"></div>
@@ -134,37 +111,62 @@
       <button type="button" class="seg-btn active" onclick="switchTab('single', this)"><i class="bi bi-box"></i> Single</button>
       <button type="button" class="seg-btn" onclick="switchTab('bulk', this)"><i class="bi bi-boxes"></i> Bulk</button>
       <button type="button" class="seg-btn" onclick="switchTab('consol', this)"><i class="bi bi-layers"></i> Master</button>
+      <button type="button" class="seg-btn" onclick="switchTab('carrier', this)"><i class="bi bi-airplane-engines"></i> Carrier</button>
     </div>
 
     <div class="content-card">
       
-      <!-- ID Input Sections (Controlled by Tabs) -->
+      <!-- 1. SINGLE UPDATE -->
       <div id="tab-single" class="tab-content active">
         <div class="input-group">
           <label class="input-label">Booking ID / AWB <span style="color: #dc2626;">*</span></label>
           <div class="input-with-btn">
             <input type="text" id="scanSingleId" class="minimal-input" placeholder="Scan or enter AWB..." autocomplete="off">
-            <button class="btn-scan-input" onclick="startScanner('scanSingleId')"><i class="bi bi-qr-code-scan"></i></button>
+            <button class="btn-scan-input" onclick="triggerScanner('scanSingleId')"><i class="bi bi-qr-code-scan"></i></button>
           </div>
         </div>
       </div>
 
+      <!-- 2. BULK UPDATE -->
       <div id="tab-bulk" class="tab-content">
         <div class="input-group">
           <label class="input-label">Multiple Booking IDs <span style="color: #dc2626;">*</span></label>
           <div class="input-with-btn">
             <textarea id="scanBulkIds" class="minimal-input" placeholder="Scan sequentially or paste..." autocomplete="off"></textarea>
-            <button class="btn-scan-input" style="height: auto;" onclick="startScanner('scanBulkIds', true)"><i class="bi bi-upc-scan"></i></button>
+            <button class="btn-scan-input" style="height: auto;" onclick="triggerScanner('scanBulkIds', true)"><i class="bi bi-upc-scan"></i></button>
           </div>
         </div>
       </div>
 
+      <!-- 3. MASTER/CONSOL UPDATE -->
       <div id="tab-consol" class="tab-content">
         <div class="input-group">
           <label class="input-label">Master Consolidation ID <span style="color: #dc2626;">*</span></label>
           <div class="input-with-btn">
             <input type="text" id="scanConsolId" class="minimal-input" placeholder="Scan Master Bag ID..." autocomplete="off">
-            <button class="btn-scan-input" onclick="startScanner('scanConsolId')"><i class="bi bi-qr-code-scan"></i></button>
+            <button class="btn-scan-input" onclick="triggerScanner('scanConsolId')"><i class="bi bi-qr-code-scan"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. CARRIER ASSIGNMENT MODULE -->
+      <div id="tab-carrier" class="tab-content">
+        <div class="input-group">
+          <label class="input-label">Booking / Master ID <span style="color: #dc2626;">*</span></label>
+          <div class="input-with-btn">
+            <input type="text" id="carrierId" class="minimal-input" placeholder="Scan Item or Master Bag..." autocomplete="off">
+            <button class="btn-scan-input" onclick="triggerScanner('carrierId')"><i class="bi bi-qr-code-scan"></i></button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Forwarding Agent <span style="color: #dc2626;">*</span></label>
+          <input type="text" id="fwdAgent" class="minimal-input" placeholder="e.g., DHL, Oman Air">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Carrier Docket / Ref <span style="color: #dc2626;">*</span></label>
+          <div class="input-with-btn">
+            <input type="text" id="fwdDocket" class="minimal-input" placeholder="Agent AWB...">
+            <button class="btn-scan-input" style="background: var(--text-muted);" onclick="triggerScanner('fwdDocket')"><i class="bi bi-qr-code"></i></button>
           </div>
         </div>
       </div>
@@ -177,7 +179,9 @@
         <select id="scanStatus" class="minimal-input status-select">
           <option value="" disabled selected>Select Milestone...</option>
           <option value="Picked Up">Picked Up</option>
-          <option value="In-Transit">In-Transit</option>
+          <option value="In-Transit">In-Transit (Hub)</option>
+          <option value="Dispatched">Dispatched to Carrier</option>
+          <option value="Out for Delivery">Out for Delivery</option>
           <option value="Delivered">Delivered</option>
         </select>
       </div>
@@ -193,39 +197,44 @@
         </div>
       </div>
 
-      <!-- Optional Carrier Section -->
-      <div id="carrierWrapper">
-        <div class="carrier-toggle-btn" id="carrierToggle" onclick="toggleCarrierSection()">
-          <span><i class="bi bi-airplane-engines"></i> Assign Carrier</span>
-          <i class="bi bi-plus-circle" id="carrierIcon"></i>
-        </div>
-        
-        <div class="carrier-section" id="carrierSection">
-          <div class="input-group">
-            <label class="input-label">Forwarding Agent</label>
-            <input type="text" id="fwdAgent" class="minimal-input" placeholder="e.g., DHL, Oman Air">
-          </div>
-          <div class="input-group">
-            <label class="input-label">Carrier Docket / Ref</label>
-            <div class="input-with-btn">
-              <input type="text" id="fwdDocket" class="minimal-input" placeholder="Agent AWB...">
-              <button class="btn-scan-input" style="background: var(--text-muted);" onclick="startScanner('fwdDocket')"><i class="bi bi-qr-code"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Action Button -->
       <button id="updateBtn" class="btn-primary-custom" onclick="submitStatusUpdate()">
         <i class="bi bi-cloud-arrow-up-fill"></i> Commit Record
       </button>
 
     </div>
+
+    <!-- INVENTORY SECTION -->
+    <div class="page-header" style="margin-top: 32px; margin-bottom: 16px;">
+      <h2 class="page-title" style="font-size: 1.3rem;"><i class="bi bi-box-seam"></i> Current Inventory</h2>
+      <p class="page-subtitle">Pending packages at <strong id="inventoryBranchName">---</strong></p>
+    </div>
+    
+    <div class="content-card" style="padding: 0; overflow: hidden;">
+       <!-- Loading State -->
+       <div id="inventoryLoading" style="padding: 30px; text-align: center; color: var(--text-muted);">
+          <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 2rem; color: var(--brand-accent);"></i>
+          <p style="margin-top: 10px; font-size: 0.9rem; font-family: 'Lexend', sans-serif;">Fetching branch stock...</p>
+       </div>
+       
+       <!-- Empty State -->
+       <div id="inventoryEmpty" class="d-none" style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+          <i class="bi bi-check-circle" style="font-size: 3rem; color: var(--success-color); display: block; margin-bottom: 12px;"></i>
+          <p style="margin: 0; font-size: 0.95rem; font-family: 'Lexend', sans-serif; color: var(--text-main);">All Clear!</p>
+          <p style="margin: 4px 0 0 0; font-size: 0.8rem;">No pending packages found at this location.</p>
+       </div>
+       
+       <!-- List Container -->
+       <div id="inventoryList" class="d-none" style="max-height: 400px; overflow-y: auto;">
+          <!-- Items will be injected here via JavaScript -->
+       </div>
+    </div>
+
   </div>
 </div>
 
 <!-- Connect nav.js -->
-<script src="nav.js"></script>
+<script src="/nav.js"></script>
 
 <script>
   // Initialize Page and Navbar on Load
@@ -233,6 +242,8 @@
     if (typeof initNavigation === 'function') {
       initNavigation('StatusUpdate'); 
     }
+    document.getElementById('inventoryBranchName').innerText = sessionUser.branch;
+    loadInventory(); // Fetch stock on load
   });
 
   // Ensure Session
@@ -259,87 +270,48 @@
     activeTab = tabId;
   }
 
-  function toggleCarrierSection() {
-    const sec = document.getElementById('carrierSection');
-    const toggleBtn = document.getElementById('carrierToggle');
-    const icon = document.getElementById('carrierIcon');
-    
-    sec.classList.toggle('expanded');
-    
-    if (sec.classList.contains('expanded')) {
-      icon.className = 'bi bi-dash-circle';
-      toggleBtn.classList.add('active');
+  // --- SCANNER INTEGRATION (Utilizing your existing scanner.js) ---
+  function triggerScanner(targetInputId, isContinuous = false) {
+    if (typeof openScanner === 'function') {
+      // Calling the same openScanner function used in mobilebooking.html
+      openScanner('input', function(decodedText) {
+        const inputField = document.getElementById(targetInputId);
+        
+        if (isContinuous) {
+          inputField.value = inputField.value ? inputField.value + ",\n" + decodedText : decodedText;
+        } else {
+          inputField.value = decodedText;
+        }
+        
+        if(navigator.vibrate) navigator.vibrate(100);
+      });
     } else {
-      icon.className = 'bi bi-plus-circle';
-      toggleBtn.classList.remove('active');
+      showAlert('danger', 'Scanner script missing. Please check connection.');
     }
   }
 
-  // --- SCANNER INTEGRATION (scanner.js) ---
-  let activeTargetInput = null;
-  let isContinuousScan = false;
-
-  function startScanner(targetInputId, continuous = false) {
-    activeTargetInput = targetInputId;
-    isContinuousScan = continuous;
-    document.getElementById('scannerModal').classList.add('active');
-    
-    // Calling standard functions expected in scanner.js
-    if (typeof initBarcodeScanner === 'function') {
-      initBarcodeScanner('camera-stream', handleScanResult);
-    } else {
-      console.warn("scanner.js not loaded or initBarcodeScanner is missing.");
-      showAlert('danger', 'Scanner module failed to load.');
-    }
-  }
-
-  function handleScanResult(barcodeData) {
-    const inputField = document.getElementById(activeTargetInput);
-    if (isContinuousScan) {
-      if (!inputField.value.includes(barcodeData)) {
-        inputField.value = inputField.value ? inputField.value + ",\n" + barcodeData : barcodeData;
-      }
-    } else {
-      inputField.value = barcodeData;
-      stopScanner();
-    }
-    // Haptic feedback for mobile devices
-    if(navigator.vibrate) navigator.vibrate(100);
-  }
-
-  function stopScanner() {
-    document.getElementById('scannerModal').classList.remove('active');
-    if (typeof stopBarcodeScanner === 'function') {
-      stopBarcodeScanner();
-    }
-  }
-
-  // --- BACKEND API CALL ---
+  // --- BACKEND API CALLS ---
   const GAS_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; 
 
+  // 1. Submit the Status / Carrier Update
   async function submitStatusUpdate() {
     const status = document.getElementById('scanStatus').value;
     const location = document.getElementById('scanLocation').value.trim();
     const customDate = document.getElementById('scanDate').value;
     
-    let fwdAgent = activeTab === 'single' ? document.getElementById('fwdAgent').value.trim() : "";
-    let fwdDocket = activeTab === 'single' ? document.getElementById('fwdDocket').value.trim() : "";
-    
     if (!status) return showAlert('danger', 'Please select a New Status Milestone.');
 
     let actionName = '';
     let payloadArgs = [];
-    const commonArgs = [status, sessionUser.name, sessionUser.branch, location, "", customDate, fwdAgent, fwdDocket];
+    let fwdAgent = "";
+    let fwdDocket = "";
 
     if (activeTab === 'single') {
       let singleId = document.getElementById('scanSingleId').value.trim();
-      if (!singleId) return showAlert('danger', 'Please enter or scan a Booking ID.');
-      
-      // Protect leading zeros by casting to string and prepending apostrophe if needed by GAS
-      singleId = String(singleId); 
+      if (!singleId) return showAlert('danger', 'Please enter a Booking ID.');
       
       actionName = 'updateManualTrackingStatus';
-      payloadArgs = [singleId, ...commonArgs];
+      payloadArgs = [String(singleId), status, sessionUser.name, sessionUser.branch, location, "", customDate, "", ""];
     
     } else if (activeTab === 'bulk') {
       const rawIds = document.getElementById('scanBulkIds').value.trim();
@@ -347,16 +319,26 @@
       if (bulkIds.length === 0) return showAlert('danger', 'Please provide at least one Booking ID.');
       
       actionName = 'updateBulkManualTrackingStatus';
-      payloadArgs = [bulkIds, ...commonArgs];
+      payloadArgs = [bulkIds, status, sessionUser.name, sessionUser.branch, location, "", customDate, "", ""];
     
     } else if (activeTab === 'consol') {
       let consolId = document.getElementById('scanConsolId').value.trim();
       if (!consolId) return showAlert('danger', 'Please enter a Master Consolidation ID.');
       
-      consolId = String(consolId);
-      
       actionName = 'updateConsolidationTrackingStatus';
-      payloadArgs = [consolId, ...commonArgs];
+      payloadArgs = [String(consolId), status, sessionUser.name, sessionUser.branch, location, "", customDate, "", ""];
+      
+    } else if (activeTab === 'carrier') {
+      let carrierId = document.getElementById('carrierId').value.trim();
+      fwdAgent = document.getElementById('fwdAgent').value.trim();
+      fwdDocket = document.getElementById('fwdDocket').value.trim();
+      
+      if (!carrierId) return showAlert('danger', 'Please enter the Booking or Master ID.');
+      if (!fwdAgent || !fwdDocket) return showAlert('danger', 'Please provide both Forwarding Agent and Docket Number.');
+
+      // Assumes standard manual tracking update can accept carrier details
+      actionName = 'updateManualTrackingStatus'; 
+      payloadArgs = [String(carrierId), status, sessionUser.name, sessionUser.branch, location, "", customDate, fwdAgent, fwdDocket];
     }
 
     await executeBackendApiCall(actionName, payloadArgs);
@@ -378,14 +360,18 @@
       const result = await response.json();
       
       if (result.success) {
-        showAlert('success', result.message || 'Status updated successfully!');
-        // Clear inputs on success
-        if (activeTab === 'single') document.getElementById('scanSingleId').value = '';
-        if (activeTab === 'bulk') document.getElementById('scanBulkIds').value = '';
-        if (activeTab === 'consol') document.getElementById('scanConsolId').value = '';
+        showAlert('success', result.message || 'Update logged successfully!');
         
-        // Reset dropdown
+        // Clear inputs on success
+        document.getElementById('scanSingleId').value = '';
+        document.getElementById('scanBulkIds').value = '';
+        document.getElementById('scanConsolId').value = '';
+        document.getElementById('carrierId').value = '';
+        document.getElementById('fwdDocket').value = '';
         document.getElementById('scanStatus').value = '';
+        
+        // Refresh inventory if successful
+        loadInventory(); 
       } else {
         showAlert('danger', result.message || 'Failed to update status.');
       }
@@ -394,6 +380,62 @@
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Commit Record';
+    }
+  }
+
+  // 2. Fetch and Render the Branch Inventory
+  async function loadInventory() {
+    const loadingUI = document.getElementById('inventoryLoading');
+    const emptyUI = document.getElementById('inventoryEmpty');
+    const listUI = document.getElementById('inventoryList');
+    
+    loadingUI.classList.remove('d-none');
+    emptyUI.classList.add('d-none');
+    listUI.classList.add('d-none');
+    listUI.innerHTML = ''; // Clear old data
+
+    try {
+      // NOTE: This assumes your GAS backend has a "getBranchInventory" action.
+      // If it doesn't yet, this will fail gracefully and just show an empty list.
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ 
+          action: 'getBranchInventory', 
+          branch: sessionUser.branch 
+        })
+      });
+      
+      const res = await response.json();
+      const inventoryData = res.data || [];
+
+      loadingUI.classList.add('d-none');
+
+      if (inventoryData.length === 0) {
+        emptyUI.classList.remove('d-none');
+      } else {
+        inventoryData.forEach(item => {
+          // Fallbacks in case keys differ in your database
+          const id = item.bookingID || item.id || "Unknown ID";
+          const dest = item.destCity || item.destination || "N/A";
+          const status = item.status || "Pending";
+          const date = item.date ? new Date(item.date).toLocaleDateString() : "";
+          
+          listUI.innerHTML += `
+            <div class="inv-list-item">
+              <div>
+                <div class="inv-id">${id}</div>
+                <div class="inv-details"><i class="bi bi-geo-alt"></i> To: ${dest} &nbsp; ${date}</div>
+              </div>
+              <div class="inv-status-badge">${status}</div>
+            </div>
+          `;
+        });
+        listUI.classList.remove('d-none');
+      }
+
+    } catch (error) {
+      loadingUI.innerHTML = `<i class="bi bi-exclamation-triangle" style="font-size: 2rem; color: #dc2626;"></i><p style="margin-top:10px;">Failed to load inventory.</p>`;
     }
   }
 </script>
