@@ -384,7 +384,7 @@
   // --- SINGLE BOOKING (MANUAL) ---
   async function submitBooking() {
     const btn = document.getElementById('submitBtn'); 
-    const customId = String(document.getElementById('bookingID').value.trim()); // Enforcing String formatting
+    const customId = String(document.getElementById('bookingID').value.trim());
     if (!customId) return showAlert('danger', 'Please enter a Booking ID.');
 
     const formData = {
@@ -401,6 +401,10 @@
       pcs: document.getElementById('pcs').value
     };
 
+    // THE FIX: Add a hidden apostrophe so Sheets doesn't delete the zero
+    const payloadData = { ...formData };
+    payloadData.bookingID = "'" + payloadData.bookingID;
+
     btn.disabled = true; 
     btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Processing...';
 
@@ -411,7 +415,7 @@
         redirect: 'follow',
         body: JSON.stringify({
           action: "createNewBooking",
-          bookingData: formData,
+          bookingData: payloadData, // Sending the fixed payload here
           user: sessionUser.name,
           branch: sessionUser.branch
         })
@@ -587,6 +591,10 @@
     const btn = document.getElementById('submitFetchedBtn');
     if (!tempFetchedData) return;
 
+    // THE FIX: Add a hidden apostrophe so Sheets doesn't delete the zero
+    const payloadData = { ...tempFetchedData };
+    payloadData.bookingID = "'" + payloadData.bookingID;
+
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Saving...';
 
@@ -597,7 +605,7 @@
         redirect: 'follow',
         body: JSON.stringify({
           action: "createNewBooking",
-          bookingData: tempFetchedData,
+          bookingData: payloadData, // Sending the fixed payload here
           user: sessionUser.name,
           branch: sessionUser.branch
         })
