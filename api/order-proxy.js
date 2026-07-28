@@ -11,23 +11,16 @@ export default async function handler(req, res) {
 
   try {
     const targetUrl = `https://alfarhaonline.com/api/order-details?order_no=${encodeURIComponent(order_no)}`;
-    const apiKey = 'R681hJQUTSXBqf6QHxLasBln2x0';
     
-    // We are firing the API key at the server from every possible angle
+    // The CORRECTED API Key!
+    const apiKey = 'R681hJQUTSXBqf6QHxLasB1n2x0'; 
+    
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'X-API-KEY': apiKey,
-        'security-token': apiKey,
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        order_no: order_no,
-        token: apiKey,
-        security_token: apiKey
-      })
+        'Accept': 'application/json'
+      }
     });
 
     const data = await response.json();
