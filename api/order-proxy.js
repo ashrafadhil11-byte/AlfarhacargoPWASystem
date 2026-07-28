@@ -11,16 +11,17 @@ export default async function handler(req, res) {
 
   try {
     const targetUrl = `https://alfarhaonline.com/api/order-details?order_no=${encodeURIComponent(order_no)}`;
-    
-    // The CORRECTED API Key!
     const apiKey = 'R681hJQUTSXBqf6QHxLasB1n2x0'; 
     
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'X-API-KEY': apiKey,
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded' // Tells the server we are sending form data
+      },
+      // This forces the order_no into the POST body so the server cannot miss it
+      body: new URLSearchParams({ order_no: order_no.trim() }) 
     });
 
     const data = await response.json();
@@ -31,6 +32,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Proxy Error:', error);
-    res.status(500).json({ error: 'Internal Server Error connecting to API' });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }
