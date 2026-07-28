@@ -530,9 +530,14 @@
         let resolvedOriginCity = branchMapping[sessionUser.branch] || sessionUser.branch || "Unknown City";
 
         // 3. Robust Weight & Pieces Fallback
-        // (Checks multiple possible database keys so it doesn't default to "0" if total_weight is wrong)
         const fetchedWeight = extData.weight || extData.actual_weight || extData.act_weight || extData.total_weight || extData.chargeable_weight || "0";
         const fetchedPcs = extData.pcs || extData.pieces || extData.total_box || extData.total_boxes || "1";
+
+        // --- NEW: Convert ALL CAPS Receiver City to Title Case ---
+        let rawDestCity = extData.receiver_district || "";
+        let formattedDestCity = rawDestCity.toLowerCase().replace(/\b\w/g, function(char) { 
+          return char.toUpperCase(); 
+        });
 
         // 4. Data Mapping
         tempFetchedData = {
@@ -542,7 +547,7 @@
           consignee: extData.receiver_name || "",
           originCity: resolvedOriginCity, 
           originCountry: extData.order_from || "Oman", 
-          destCity: extData.receiver_district || "", 
+          destCity: formattedDestCity, // Using the newly formatted Title Case city
           destCountry: extData.receiver_country || "Nepal",
           packageType: formattedCargoType,
           weight: fetchedWeight, 
