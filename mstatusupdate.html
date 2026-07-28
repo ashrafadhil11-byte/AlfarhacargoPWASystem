@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   
-  <!-- External Scanner Library (Your working scanner script) -->
+  <!-- External Scanner Library -->
   <script src="/scanner.js"></script>
 
   <style>
@@ -30,6 +30,9 @@
     body, html { margin: 0; padding: 0; box-sizing: border-box; height: 100vh; overflow: hidden; background-color: var(--bg-color); font-family: 'Comfortaa', cursive; color: var(--text-main); }
     *, *::before, *::after { box-sizing: inherit; }
     
+    /* UTILITY CLASSES */
+    .d-none { display: none !important; }
+
     .mobile-app { display: flex; flex-direction: column; height: 100vh; width: 100vw; position: relative; overflow: hidden; }
     .bg-glow { position: fixed; top: -10%; right: -20%; width: 80vw; height: 80vw; border-radius: 50%; background: radial-gradient(circle, rgba(79,70,229,0.08) 0%, rgba(248,250,252,0) 70%); z-index: -1; pointer-events: none; }
     
@@ -70,17 +73,25 @@
     .btn-primary-custom:active { transform: scale(0.98); }
     .btn-primary-custom:disabled { opacity: 0.7; cursor: not-allowed; }
     
-    /* Inventory List */
-    .inv-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+    /* Interactive Inventory List */
+    .inv-list-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s; border-left: 4px solid transparent; }
     .inv-list-item:last-child { border-bottom: none; }
-    .inv-id { font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--brand-accent); margin-bottom: 4px;}
+    .inv-list-item:active { background-color: #f8fafc; }
+    /* Selected state for bulk mode */
+    .inv-list-item.selected { background-color: #eef2ff; border-left-color: var(--brand-accent); }
+    
+    .inv-id { font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--text-main); margin-bottom: 4px; transition: color 0.2s;}
+    .inv-list-item.selected .inv-id { color: var(--brand-accent); }
+    
     .inv-details { font-size: 0.8rem; color: var(--text-muted); }
-    .inv-status-badge { background: #eef2ff; color: var(--brand-accent); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'Lexend', sans-serif;}
+    .inv-status-badge { background: #f1f5f9; color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'Lexend', sans-serif; transition: all 0.2s;}
+    .inv-list-item.selected .inv-status-badge { background: var(--brand-accent); color: white; }
 
     /* Alerts */
     .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
     .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
+    .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
 
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -121,7 +132,7 @@
         <div class="input-group">
           <label class="input-label">Booking ID / AWB <span style="color: #dc2626;">*</span></label>
           <div class="input-with-btn">
-            <input type="text" id="scanSingleId" class="minimal-input" placeholder="Scan or enter AWB..." autocomplete="off">
+            <input type="text" id="scanSingleId" class="minimal-input" placeholder="Scan, enter, or tap list..." autocomplete="off">
             <button class="btn-scan-input" onclick="triggerScanner('scanSingleId')"><i class="bi bi-qr-code-scan"></i></button>
           </div>
         </div>
@@ -132,7 +143,7 @@
         <div class="input-group">
           <label class="input-label">Multiple Booking IDs <span style="color: #dc2626;">*</span></label>
           <div class="input-with-btn">
-            <textarea id="scanBulkIds" class="minimal-input" placeholder="Scan sequentially or paste..." autocomplete="off"></textarea>
+            <textarea id="scanBulkIds" class="minimal-input" placeholder="Scan or select multiple from list below..." autocomplete="off"></textarea>
             <button class="btn-scan-input" style="height: auto;" onclick="triggerScanner('scanBulkIds', true)"><i class="bi bi-upc-scan"></i></button>
           </div>
         </div>
@@ -205,9 +216,12 @@
     </div>
 
     <!-- INVENTORY SECTION -->
-    <div class="page-header" style="margin-top: 32px; margin-bottom: 16px;">
-      <h2 class="page-title" style="font-size: 1.3rem;"><i class="bi bi-box-seam"></i> Current Inventory</h2>
-      <p class="page-subtitle">Pending packages at <strong id="inventoryBranchName">---</strong></p>
+    <div class="page-header" style="margin-top: 32px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h2 class="page-title" style="font-size: 1.3rem;"><i class="bi bi-box-seam"></i> Current Inventory</h2>
+        <p class="page-subtitle">Pending at <strong id="inventoryBranchName">---</strong></p>
+      </div>
+      <button onclick="loadInventory()" style="background:none; border:none; color:var(--brand-accent); font-size:1.5rem; cursor:pointer;"><i class="bi bi-arrow-clockwise"></i></button>
     </div>
     
     <div class="content-card" style="padding: 0; overflow: hidden;">
@@ -226,7 +240,7 @@
        
        <!-- List Container -->
        <div id="inventoryList" class="d-none" style="max-height: 400px; overflow-y: auto;">
-          <!-- Items will be injected here via JavaScript -->
+          <!-- Items injected via JavaScript -->
        </div>
     </div>
 
@@ -237,7 +251,7 @@
 <script src="/nav.js"></script>
 
 <script>
-  // YOUR LIVE GOOGLE API URL (Replaced from mobilebooking.html)
+  // YOUR LIVE GOOGLE API URL
   const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbwycWJw0iiCfF9ZFfj3rNpBsfiITySuJrvlSgmFW10aFBR1Qx0xwmTv30jRlZW83f-oSw/exec";
 
   // Initialize Page and Navbar on Load
@@ -257,7 +271,7 @@
   function showAlert(type, message) { 
     const alertBox = document.getElementById('booking-alert'); 
     alertBox.className = 'custom-alert alert-' + type; 
-    var icon = type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill';
+    var icon = type === 'success' ? 'check-circle-fill' : (type === 'info' ? 'info-circle-fill' : 'exclamation-triangle-fill');
     alertBox.innerHTML = `<i class="bi bi-${icon}"></i> ` + message; 
     alertBox.style.display = 'flex'; 
     document.querySelector('.main-scroll-area').scrollTo({top: 0, behavior: 'smooth'});
@@ -270,13 +284,52 @@
     btnElement.classList.add('active');
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active');
+    
+    // Clear selections when switching tabs so users don't get confused
+    document.querySelectorAll('.inv-list-item.selected').forEach(el => el.classList.remove('selected'));
+    
     activeTab = tabId;
+
+    if (tabId === 'bulk') {
+      showAlert('info', 'Tap multiple items below to add them to your bulk list.');
+    }
+  }
+
+  // --- INTERACTIVE INVENTORY SELECTION ---
+  function handleInventoryClick(element, bookingId) {
+    if (activeTab === 'bulk') {
+      // Multiple Selection Logic
+      element.classList.toggle('selected');
+      updateBulkTextarea();
+    } else {
+      // Single Selection Logic
+      let targetInput = null;
+      if (activeTab === 'single') targetInput = 'scanSingleId';
+      else if (activeTab === 'consol') targetInput = 'scanConsolId';
+      else if (activeTab === 'carrier') targetInput = 'carrierId';
+
+      if (targetInput) {
+        document.getElementById(targetInput).value = bookingId;
+        showAlert('success', `Selected ${bookingId}`);
+        // Remove any previous highlights to show just one is selected
+        document.querySelectorAll('.inv-list-item.selected').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        
+        // Scroll to top so they can update status
+        document.querySelector('.main-scroll-area').scrollTo({top: 0, behavior: 'smooth'});
+      }
+    }
+  }
+
+  function updateBulkTextarea() {
+    const selectedItems = document.querySelectorAll('.inv-list-item.selected');
+    const ids = Array.from(selectedItems).map(item => item.dataset.id);
+    document.getElementById('scanBulkIds').value = ids.join(',\n');
   }
 
   // --- SCANNER INTEGRATION (Utilizing scanner.js) ---
   function triggerScanner(targetInputId, isContinuous = false) {
     if (typeof openScanner === 'function') {
-      // Calls the same function used in your mobilebooking.html!
       openScanner('input', function(decodedText, returnedMode) {
         const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById(targetInputId);
@@ -409,7 +462,6 @@
       
       const res = await response.json();
       
-      // If the backend function doesn't exist yet, this stops it from crashing
       if (!res.success) {
         throw new Error(res.message || "Backend inventory function not found");
       }
@@ -427,7 +479,7 @@
           const status = item.status || "Pending";
           
           listUI.innerHTML += `
-            <div class="inv-list-item">
+            <div class="inv-list-item" data-id="${id}" onclick="handleInventoryClick(this, '${id}')">
               <div>
                 <div class="inv-id">${id}</div>
                 <div class="inv-details"><i class="bi bi-geo-alt"></i> To: ${dest}</div>
