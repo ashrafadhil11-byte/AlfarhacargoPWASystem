@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
+  <!-- Session & Auto-Redirect Guard -->
+  <script src="/auth-guard.js"></script>
+
   <style>
     :root {
       --bg-color: #fafafa; --card-bg: #ffffff; --border-color: #eaeaea;
@@ -151,6 +154,9 @@
         
         if (data.success) {
           localStorage.setItem('afc_user', JSON.stringify(data.user));
+          
+          // ADDED THIS LINE: Store the active timestamp upon login
+          localStorage.setItem('afc_last_active', Date.now().toString());
           
           // Route to the correct dashboard based on screen size
           if (window.innerWidth <= 900) {
