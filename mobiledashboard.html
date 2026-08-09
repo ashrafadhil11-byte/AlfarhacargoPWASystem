@@ -9,6 +9,9 @@
   <meta name="theme-color" content="#f8fafc">
   <meta name="apple-mobile-web-app-capable" content="yes">
   
+  <!-- Session & Auto-Redirect Guard -->
+  <script src="/auth-guard.js"></script>
+  
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -80,17 +83,32 @@
     .mobile-stat-card.alert-state { background: #fffafa; border-color: #fca5a5; }
     @keyframes alert-pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-    /* --- RECENT ACTIVITY LIST --- */
-    .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 8px; }
-    .activity-title { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1.1rem; color: var(--text-main); margin: 0; }
+    /* --- RECENT ACTIVITY TABS & LIST --- */
+    .activity-header { margin-bottom: 12px; margin-top: 8px; }
+    .activity-title { font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 1.1rem; color: var(--text-main); margin: 0 0 12px 0; }
     
-    .activity-list { display: flex; flex-direction: column; gap: 12px; }
-    .activity-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; cursor: pointer; }
+    /* Segmented Control / Tabs */
+    .activity-tabs { display: flex; background: #e2e8f0; padding: 4px; border-radius: 14px; margin-bottom: 16px; gap: 4px; }
+    .activity-tab { flex: 1; border: none; background: transparent; padding: 10px; font-family: 'Lexend', sans-serif; font-weight: 600; font-size: 0.9rem; color: #64748b; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; }
+    .activity-tab.active { background: var(--card-bg); color: var(--brand-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    
+    /* Tab Content Views */
+    .activity-view { display: none; flex-direction: column; gap: 12px; }
+    .activity-view.active { display: flex; animation: slideUp 0.3s ease-out forwards; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .activity-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: transform 0.2s; }
+    .activity-card:active { transform: scale(0.98); }
     
     .ac-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     .ac-id { font-family: 'Lexend', sans-serif; font-weight: 600; color: var(--brand-accent); font-size: 0.95rem; flex-shrink: 0; }
     .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; display: inline-block; border: 1px solid; font-family: 'Lexend', sans-serif; text-align: center; max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ac-dest { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+    /* Empty States */
+    .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; background: #f1f5f9; border-radius: 16px; border: 1px dashed #cbd5e0; }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: inline-block; color: #cbd5e0; }
+    .empty-state p { font-family: 'Lexend', sans-serif; font-weight: 500; font-size: 0.95rem; margin: 0; color: #64748b; }
 
     /* --- BOTTOM SHEETS --- */
     .bottom-sheet-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end; }
@@ -195,16 +213,34 @@
       </div>
     </div>
 
-    <!-- Recent Activity -->
+    <!-- Segmented Live Activity -->
     <div class="activity-header">
       <h2 class="activity-title">Live Activity</h2>
-    </div>
-    <div class="activity-list" id="recentActivityList">
-      <div style="text-align: center; padding: 30px; color: #94a3b8;">
-        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block; font-size: 1.5rem; margin-bottom: 8px;"></i><br>
-        Loading data...
+      
+      <!-- Tabs -->
+      <div class="activity-tabs">
+        <button class="activity-tab active" id="tabBtnActive" onclick="switchActivityTab('active')">Active</button>
+        <button class="activity-tab" id="tabBtnDelivered" onclick="switchActivityTab('delivered')">Delivered</button>
       </div>
     </div>
+
+    <!-- Tab View: Active/Pending -->
+    <div class="activity-view active" id="viewActive">
+      <div class="empty-state">
+        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i>
+        <p>Loading Active Shipments...</p>
+      </div>
+    </div>
+
+    <!-- Tab View: Delivered -->
+    <div class="activity-view" id="viewDelivered">
+      <div class="empty-state">
+        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i>
+        <p>Loading Past Shipments...</p>
+      </div>
+    </div>
+
+  </div> <!-- End Main Scroll -->
 
   <!-- INJECT COMMON NAVIGATION & MODAL SCRIPTS HERE -->
   <!-- STRICT ORDER: Notifications -> Nav -> Modals -> Tracking -->
@@ -240,8 +276,9 @@
         <button class="bs-close" onclick="closeBottomSheet('force', 'notifSheet')"><i class="bi bi-x"></i></button>
       </div>
       <div class="bs-content" id="mobNotifList">
-        <div style="text-align: center; color: #94a3b8; padding: 40px 20px;">
-          <i class="bi bi-bell-slash" style="font-size: 2rem; margin-bottom:10px; display:block;"></i> All caught up!
+        <div class="empty-state">
+          <i class="bi bi-bell-slash text-muted" style="color: #cbd5e0;"></i>
+          <p>All caught up!</p>
         </div>
       </div>
     </div>
@@ -293,6 +330,25 @@
   }
 
   initMobileDashboard();
+
+  // --- TAB SWITCHER LOGIC ---
+  function switchActivityTab(tabName) {
+    // Update Button styling
+    document.getElementById('tabBtnActive').classList.remove('active');
+    document.getElementById('tabBtnDelivered').classList.remove('active');
+    
+    // Update View visibility
+    document.getElementById('viewActive').classList.remove('active');
+    document.getElementById('viewDelivered').classList.remove('active');
+    
+    if (tabName === 'active') {
+      document.getElementById('tabBtnActive').classList.add('active');
+      document.getElementById('viewActive').classList.add('active');
+    } else {
+      document.getElementById('tabBtnDelivered').classList.add('active');
+      document.getElementById('viewDelivered').classList.add('active');
+    }
+  }
 
   function openBottomSheet(id) { document.getElementById(id).classList.add('active'); }
   function closeBottomSheet(e, id) { if (e === 'force' || e.target.id === id) { document.getElementById(id).classList.remove('active'); } }
@@ -370,21 +426,37 @@
         processNotifications(data.recentDelivered);
       }
 
-      // Handle Recent Activity List
-      var listEl = document.getElementById('recentActivityList');
-      listEl.innerHTML = '';
+      // Handle Segmented Recent Activity List
+      var activeView = document.getElementById('viewActive');
+      var deliveredView = document.getElementById('viewDelivered');
+      
+      activeView.innerHTML = '';
+      deliveredView.innerHTML = '';
+
       if(!data.recentBookings || data.recentBookings.length === 0) {
-        listEl.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 30px;">No recent activity found.</div>';
+        activeView.innerHTML = `<div class="empty-state"><i class="bi bi-box-seam"></i><p>No active shipments</p></div>`;
+        deliveredView.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i><p>No past shipments</p></div>`;
         return;
       }
       
+      let activeCount = 0;
+      let deliveredCount = 0;
+
       data.recentBookings.forEach(function(b) {
         var sUpper = String(b.status).toUpperCase();
         var badgeStyle = "background: #eff6ff; color: #3b82f6; border-color: #bfdbfe;"; 
+        var isDelivered = false;
         
-        if (sUpper.includes('DELIVERED')) badgeStyle = "background: #ecfdf5; color: #10b981; border-color: #d1fae5;"; 
-        else if (sUpper.includes('RETURN') || sUpper.includes('CANCEL') || sUpper.includes('FAIL') || sUpper.includes('HOLD') || sUpper.includes('EXCEPTION')) badgeStyle = "background: #fef2f2; color: #ef4444; border-color: #fecaca;"; 
-        else if (sUpper.includes('BOOK') || sUpper.includes('PENDING') || sUpper.includes('NEW') || sUpper.includes('PICKED UP')) badgeStyle = "background: #fffbeb; color: #d97706; border-color: #fde68a;"; 
+        if (sUpper.includes('DELIVERED')) {
+          badgeStyle = "background: #ecfdf5; color: #10b981; border-color: #d1fae5;"; 
+          isDelivered = true;
+        }
+        else if (sUpper.includes('RETURN') || sUpper.includes('CANCEL') || sUpper.includes('FAIL') || sUpper.includes('HOLD') || sUpper.includes('EXCEPTION')) {
+          badgeStyle = "background: #fef2f2; color: #ef4444; border-color: #fecaca;"; 
+        }
+        else if (sUpper.includes('BOOK') || sUpper.includes('PENDING') || sUpper.includes('NEW') || sUpper.includes('PICKED UP')) {
+          badgeStyle = "background: #fffbeb; color: #d97706; border-color: #fde68a;"; 
+        }
 
         var rawStatus = b.status || "Unknown";
         var displayStatus = rawStatus.length > 20 ? rawStatus.substring(0, 20) + '...' : rawStatus;
@@ -400,19 +472,37 @@
           </div>
           <div class="ac-dest"><i class="bi bi-geo-alt"></i> ${b.destination}</div>
         `;
-        listEl.appendChild(div);
+        
+        // Append to appropriate container
+        if (isDelivered) {
+          deliveredView.appendChild(div);
+          deliveredCount++;
+        } else {
+          activeView.appendChild(div);
+          activeCount++;
+        }
       });
 
+      // Show Empty States if arrays are empty
+      if (activeCount === 0) {
+        activeView.innerHTML = `<div class="empty-state"><i class="bi bi-box-seam"></i><p>No active shipments</p></div>`;
+      }
+      if (deliveredCount === 0) {
+        deliveredView.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i><p>No past shipments found</p></div>`;
+      }
+
     } catch (error) {
-      document.getElementById('recentActivityList').innerHTML = 
-        '<div style="text-align: center; color: #ef4444; padding: 30px;">' +
-        '<i class="bi bi-exclamation-triangle" style="font-size: 2rem; display:block; margin-bottom: 10px;"></i>' +
-        'Failed to load: ' + error.message + '</div>';
+      document.getElementById('viewActive').innerHTML = 
+        '<div class="empty-state" style="color: #ef4444; border-color: #fca5a5;">' +
+        '<i class="bi bi-exclamation-triangle" style="color: #ef4444;"></i>' +
+        '<p>Failed to load: ' + error.message + '</p></div>';
     }
   }
 
   function logoutSystem() { 
+    // Securely clear both session keys managed by auth-guard
     localStorage.removeItem('afc_user'); 
+    localStorage.removeItem('afc_last_active');
     window.location.href = '/login.html'; 
   }
 </script>
