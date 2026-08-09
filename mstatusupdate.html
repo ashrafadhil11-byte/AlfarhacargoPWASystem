@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   
-  <!-- REQUIRED CAMERA LIBRARY (This was missing) -->
+  <!-- REQUIRED CAMERA LIBRARY -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   
   <!-- External Scanner Library -->
@@ -77,6 +77,8 @@
     
     .status-select { font-weight: 700; color: var(--brand-accent); border-color: #e0e7ff; background-color: #eef2ff; }
     .status-select:focus { border-color: var(--brand-accent); }
+    .status-select optgroup { font-family: 'Lexend', sans-serif; font-weight: 700; color: var(--text-muted); font-style: normal; }
+    .status-select option { font-weight: 500; color: var(--text-main); }
 
     /* Action Buttons */
     .btn-primary-custom { font-family: 'Lexend', sans-serif; font-weight: 700; background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-dark) 100%); color: white; border: none; padding: 18px; border-radius: 16px; width: 100%; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; font-size: 1.05rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4); }
@@ -199,13 +201,58 @@
       <!-- Shared Milestone Fields -->
       <div class="input-group">
         <label class="input-label">New Status Milestone <span style="color: #dc2626;">*</span></label>
-        <select id="scanStatus" class="minimal-input status-select">
+        <select id="scanStatus" name="shipping_milestone" class="minimal-input status-select" required>
           <option value="" disabled selected>Select Milestone...</option>
-          <option value="Picked Up">Picked Up</option>
-          <option value="In-Transit">In-Transit (Hub)</option>
-          <option value="Dispatched">Dispatched to Carrier</option>
-          <option value="Out for Delivery">Out for Delivery</option>
-          <option value="Delivered">Delivered</option>
+
+          <optgroup label="Booking & Pickup">
+            <option value="Shipment Booked">Shipment Booked</option>
+            <option value="Awaiting Pickup">Awaiting Pickup</option>
+            <option value="Picked Up">Picked Up</option>
+          </optgroup>
+
+          <optgroup label="Origin Hub Processing">
+            <option value="Arrived at Origin Hub">Arrived at Origin Hub</option>
+            <option value="Sorting in Progress">Sorting in Progress</option>
+            <option value="Consolidated for Shipment">Consolidated for Shipment</option>
+          </optgroup>
+
+          <optgroup label="Forwarding & Carrier">
+            <option value="Assigned Forwarding Agent">Assigned Forwarding Agent</option>
+            <option value="Handed Over to Agent">Handed Over to Forwarding Agent</option>
+            <option value="Dispatched to Carrier">Dispatched to Carrier</option>
+            <option value="Arrived at Departure Port">Arrived at Port/Airport of Departure</option>
+          </optgroup>
+
+          <optgroup label="Customs (Origin)">
+            <option value="Awaiting Export Customs">Awaiting Export Customs</option>
+            <option value="Export Customs Cleared">Export Customs Cleared</option>
+          </optgroup>
+
+          <optgroup label="In-Transit">
+            <option value="Departed Origin">Departed Origin</option>
+            <option value="In-Transit">In-Transit (Main Leg)</option>
+            <option value="In-Transit Transit Hub">Arrived at Transit Hub</option>
+          </optgroup>
+
+          <optgroup label="Destination & Customs">
+            <option value="Arrived at Destination Port">Arrived at Destination Port/Airport</option>
+            <option value="Awaiting Import Customs">Awaiting Import Customs Clearance</option>
+            <option value="Import Customs Cleared">Import Customs Cleared</option>
+          </optgroup>
+
+          <optgroup label="Last Mile & Delivery">
+            <option value="Arrived at Destination Hub">Arrived at Destination Hub</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+          </optgroup>
+
+          <optgroup label="Exceptions & Holds">
+            <option value="On Hold">On Hold (General)</option>
+            <option value="Held at Customs">Held at Customs</option>
+            <option value="Delivery Attempted">Delivery Attempted (Rescheduling)</option>
+            <option value="Returned to Facility">Returned to Hub/Facility</option>
+            <option value="Returned to Sender">Returned to Sender</option>
+          </optgroup>
         </select>
       </div>
 
