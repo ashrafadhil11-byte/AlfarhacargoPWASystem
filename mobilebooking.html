@@ -24,6 +24,7 @@
       --text-muted: #64748b; 
       --brand-accent: #4f46e5; 
       --success-color: #10b981;
+      --whatsapp-color: #25D366;
       --bottom-nav-height: 65px;
     }
     
@@ -116,6 +117,14 @@
     .custom-alert { border-radius: 12px; font-family: 'Lexend', sans-serif; font-size: 0.9rem; padding: 12px 16px; margin-bottom: 20px; display: none; align-items: center; gap: 8px; }
     .alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
     .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; }
+
+    /* Success Modal Animations */
+    .success-icon-wrapper { margin-bottom: 15px; animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards; }
+    @keyframes bounceIn { 
+      0% { transform: scale(0.3); opacity: 0; } 
+      50% { transform: scale(1.1); } 
+      100% { transform: scale(1); opacity: 1; } 
+    }
 
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -311,6 +320,29 @@
   </div>
 </div>
 
+<!-- ============================================== -->
+<!-- SUCCESS CONFIRMATION MODAL WITH WHATSAPP       -->
+<!-- ============================================== -->
+<div class="bottom-sheet-overlay" id="successModalOverlay" onclick="closeSuccessModal(event)">
+  <div class="bottom-sheet" style="text-align: center; padding-bottom: 20px;">
+    <div style="padding: 30px 20px 10px;">
+      <div class="success-icon-wrapper">
+        <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: var(--success-color);"></i>
+      </div>
+      <h2 style="font-family: 'Lexend', sans-serif; margin-top: 10px; margin-bottom: 5px;">Booking Saved!</h2>
+      <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Tracking ID: <strong id="successTrackingId" style="color: var(--text-main); font-size: 1.1rem;">---</strong></p>
+      
+      <button type="button" class="btn-primary-custom" style="background-color: var(--whatsapp-color); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.25);" onclick="notifyCustomerWhatsApp()">
+        <i class="bi bi-whatsapp" style="font-size: 1.1rem;"></i> Notify via WhatsApp
+      </button>
+      
+      <button type="button" class="btn-secondary-custom" style="background: transparent; border: 1px solid var(--border-color); margin-top: 10px;" onclick="closeSuccessModal('force')">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- INJECT MODULAR SCRIPTS HERE -->
 <script src="/scanner.js"></script>
 <script src="/nav.js"></script>
@@ -325,6 +357,7 @@
 
   // Globals
   var tempFetchedData = null; 
+  var currentSavedBooking = null; // Store data for WhatsApp notification
 
   // --- UI CONTROLLERS ---
   function switchTab(tabId, btnElement) {
@@ -352,6 +385,43 @@
       document.getElementById('fetchedTicketModal').classList.remove('active');
       resetFetchState();
     }
+  }
+
+  // Handle Success Modal Closing
+  function closeSuccessModal(e) {
+    if (e === 'force' || (e && e.target.id === 'successModalOverlay')) {
+      document.getElementById('successModalOverlay').classList.remove('active');
+      currentSavedBooking = null; // reset
+    }
+  }
+
+  // Show Success Modal
+  function showSuccessModal(bookingData) {
+    currentSavedBooking = bookingData;
+    document.getElementById('successTrackingId').innerText = bookingData.bookingID;
+    document.getElementById('successModalOverlay').classList.add('active');
+  }
+
+  // Trigger WhatsApp Template
+  function notifyCustomerWhatsApp() {
+    if (!currentSavedBooking || !currentSavedBooking.shipperPhone) {
+      showAlert('danger', 'No phone number available to notify.');
+      return;
+    }
+
+    // Clean phone number: remove extra spaces/dashes. Keeps plus sign if present.
+    let phone = currentSavedBooking.shipperPhone.replace(/[-\s]/g, '');
+    let shipperName = currentSavedBooking.shipper || 'Customer';
+    let destCity = currentSavedBooking.destCity || 'your destination';
+    
+    // Construct Pre-filled Message
+    let textMessage = `Hello ${shipperName},\n\nYour booking with *Al-Farha Cargo* has been successfully confirmed!\n\n📦 *Tracking ID:* ${currentSavedBooking.bookingID}\n📍 *Destination:* ${destCity}\n⚖️ *Weight:* ${currentSavedBooking.weight || 'N/A'} KG\n\nThank you for choosing Al-Farha Cargo! Have a great day.`;
+    
+    // Encode for URL
+    let encodedMessage = encodeURIComponent(textMessage);
+    
+    // Open WhatsApp
+    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
   }
 
   // Resets the scanner tab back to the default state
@@ -426,8 +496,9 @@
       btn.innerHTML = 'Submit Booking <i class="bi bi-arrow-right"></i>';
 
       if(res.success) { 
-        showAlert('success', "Saved " + customId); 
         clearSingleForm(); 
+        // Trigger the new Success Modal with data
+        showSuccessModal(formData); 
       } else { 
         showAlert('danger', res.message || "Failed to save booking."); 
       }
@@ -615,7 +686,8 @@
       
       if(res.success) {
         closeTicketModal('force');
-        showAlert('success', `Saved ${tempFetchedData.bookingID} successfully!`);
+        // Trigger the new Success Modal with fetched data
+        showSuccessModal(tempFetchedData);
       } else {
         showAlert('danger', res.message || "Failed to save.");
         btn.disabled = false; 
