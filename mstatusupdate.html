@@ -15,6 +15,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   
+  <!-- REQUIRED CAMERA LIBRARY (This was missing) -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
   <!-- External Scanner Library -->
   <script src="/scanner.js"></script>
 
@@ -339,8 +342,8 @@
   // --- SCANNER INTEGRATION (Utilizing scanner.js) ---
   function triggerScanner(targetInputId, isContinuous = false) {
     if (typeof openScanner === 'function') {
-      // Pass 'camera' as the mode parameter to force the camera overlay in scanner.js
-      openScanner('camera', function(decodedText) {
+      // Reverted to 'input' mode so scanner.js correctly displays the camera modal
+      openScanner('input', function(decodedText, returnedMode) {
         const trimmedCode = decodedText.replace(/\s+/g, '');
         const inputField = document.getElementById(targetInputId);
         
